@@ -12,7 +12,10 @@ export function Footer() {
       <Frieze variant="steps" fg="orange" accent="safran" bg="brun" height={20} />
       <div className="container-x grid gap-12 py-16 md:grid-cols-12">
         <div className="md:col-span-4">
-          <Logo tone="light" />
+          {/* Le logo (texte noir, fond transparent) est posé sur un aplat crème */}
+          <Link href="/" aria-label="Maison Kayes — accueil" className="inline-block bg-creme p-4">
+            <Logo sizes="(min-width: 48rem) 13rem, 11rem" className="w-44 md:w-52" />
+          </Link>
           <p className="mt-5 max-w-xs text-creme/80">
             Vêtements & accessoires Afro Fusion, entre héritage et matières réinventées.
           </p>
@@ -68,8 +71,8 @@ export function Footer() {
                 {site.socials.map((s) => (
                   <li key={s.url}>
                     <a href={s.url} target="_blank" rel="noopener noreferrer" className="hover:text-safran hover:underline">
-                      {s.label} — {s.handle} <span aria-hidden="true">↗</span>
-                      <span className="sr-only">(ouvre un nouvel onglet)</span>
+                      {s.handle} <span aria-hidden="true">↗</span>
+                      <span className="sr-only">({s.label}, ouvre un nouvel onglet)</span>
                     </a>
                   </li>
                 ))}

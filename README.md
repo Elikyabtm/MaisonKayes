@@ -21,7 +21,7 @@ Variable d’environnement facultative : `NEXT_PUBLIC_SITE_URL` (URL publique, p
 
 | Fichier | Contenu |
 | --- | --- |
-| `src/data/site.ts` | Logo, lien de la boutique Etsy, e-mail, téléphone, ville, réseaux sociaux, crédit |
+| `src/data/site.ts` | Logo, lien de la boutique Etsy, e-mail (contact@maisonkayes.be), Instagram (@maisonkayes), téléphone, ville, crédit |
 | `src/data/products.ts` | Catalogue : noms, catégories, descriptions, images, prix, caractéristiques, liens Etsy |
 | `src/data/content.ts` | Texte « À propos » (parcours, histoire du nom, inspirations), étapes et projets d’upcycling |
 | `src/app/mentions-legales`, `src/app/confidentialite` | Pages légales à compléter |
@@ -32,10 +32,13 @@ Toute valeur laissée à `null` (ou tableau vide) est masquée : aucun faux lien
 - **Boutique Etsy** : renseigner `etsyShopUrl`. Sinon, le bouton « Boutique Etsy (bientôt) » mène à la page Contact.
 - **Filtre Upcycling** : il apparaît automatiquement dès qu’un produit a `upcycled: true`.
 - **Projets de transformation** : ajouter des entrées à `transformationProjects` ; la section apparaît sur la page Upcycling.
-- **Logo** : déposer le fichier dans `public/images/` et renseigner `logoSrc`.
+- **Logo** : `public/images/logo-maison-kayes.webp` (fond transparent, texte noir : toujours sur fond clair).
+- **Favicon** : `src/app/favicon.ico`, `src/app/icon.png` et `src/app/apple-icon.png` (conventions Next.js, balises générées automatiquement).
 
 ## Images
 
 Les images optimisées (WebP, noms explicites) sont dans `public/images/`. Le cadrage se règle image par image
 avec le champ `position` (`object-position` CSS) dans `products.ts`.
-Les découpes du ZIP (≈ 160 à 360 px de large) sont affichées dans de petits formats, sans recadrage, et ne sont jamais agrandies au-delà de 2×.
+Les fichiers sources (jusqu’à 1 800 px) sont déclinés automatiquement par `next/image` en variantes adaptées à chaque écran
+(AVIF/WebP, `srcset`), avec chargement différé hors du premier écran et visuel d’accueil préchargé.
+Les images de la veste en denim (page Upcycling) sont des images générées, présentées comme exemple illustratif.

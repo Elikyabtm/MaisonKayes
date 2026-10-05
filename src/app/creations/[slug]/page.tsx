@@ -40,7 +40,7 @@ export default async function ProductPage({ params }: PageProps<"/creations/[slu
 
   return (
     <>
-      <nav aria-label="Fil d’Ariane" className="container-x pt-8">
+      <nav aria-label="Fil d’Ariane" className="container-x pt-14 sm:pt-16 lg:pt-24">
         <ol className="eyebrow flex flex-wrap items-center gap-2 text-[0.72rem] text-brun-soft">
           <li>
             <Link href="/creations" className="hover:text-brun hover:underline">

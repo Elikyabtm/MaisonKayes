@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { site } from "@/data/site";
+import { instagram, site } from "@/data/site";
 
 /**
  * Lien vers la boutique Etsy. Tant que `site.etsyShopUrl` n’est pas renseigné,
@@ -36,16 +36,32 @@ export function BuyOnEtsy({ url, productName }: { url: string | null; productNam
       </div>
     );
   }
+  const { email } = site.contact;
+  const ig = instagram();
   return (
     <div className="border-2 border-brun bg-safran/25 p-5">
       <p className="font-semibold">Cette pièce vous intéresse ?</p>
       <p className="mt-1 text-sm">
-        Sa fiche Etsy n’est pas encore en ligne. Contactez Maison Kayes pour en savoir plus sur sa disponibilité.
+        Sa fiche Etsy n’est pas encore en ligne. Écrivez à Maison Kayes pour en savoir plus sur sa disponibilité.
       </p>
-      <Link href="/contact" className="btn btn-primary mt-4">
-        Contacter la marque <span aria-hidden="true">→</span>
-      </Link>
-      <p className="mt-3 text-sm text-brun-soft">L’achat et le paiement s’effectuent sur Etsy.</p>
+      <div className="mt-4 flex flex-col gap-2 xs:flex-row xs:flex-wrap">
+        {email ? (
+          <a href={`mailto:${email}?subject=${encodeURIComponent(productName)}`} className="btn btn-primary">
+            Écrire à la marque <span aria-hidden="true">→</span>
+          </a>
+        ) : (
+          <Link href="/contact" className="btn btn-primary">
+            Contacter la marque <span aria-hidden="true">→</span>
+          </Link>
+        )}
+        {ig && (
+          <a href={ig.url} target="_blank" rel="noopener noreferrer" className="btn btn-ghost">
+            {ig.handle} <span aria-hidden="true">↗</span>
+            <span className="sr-only">(Instagram, ouvre un nouvel onglet)</span>
+          </a>
+        )}
+      </div>
+      <p className="mt-3 text-sm text-brun-soft">Les achats et paiements se feront sur Etsy.</p>
     </div>
   );
 }

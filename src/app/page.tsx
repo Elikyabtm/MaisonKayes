@@ -7,7 +7,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { Diamond, HalfDisc, Rings, Triangle } from "@/components/Shapes";
 import { about } from "@/data/content";
 import { getProduct, homeSelection, type Product } from "@/data/products";
-import { instagram } from "@/data/site";
+import { instagram, site } from "@/data/site";
 import { pageMetadata } from "@/lib/metadata";
 
 export const metadata = pageMetadata({
@@ -93,11 +93,11 @@ export default function HomePage() {
             title="Vêtements"
             label="Imprimés graphiques"
             image={{
-              src: "/images/robe-geometrique-mise-en-scene.webp",
-              alt: "Robe à motifs géométriques portée, cadrage serré sur la silhouette",
-              position: "71% 40%",
+              src: "/images/robe-geometrique-portee.webp",
+              alt: "Mannequin portant la robe à motifs géométriques contre un mur ocre",
+              position: "50% 22%",
             }}
-            className="aspect-[4/5] md:col-span-5 md:aspect-[5/4]"
+            className="aspect-[4/5] md:col-span-5"
             sizes="(min-width: 48rem) 40vw, 100vw"
             tag="bg-safran text-brun"
           />
@@ -221,20 +221,33 @@ export default function HomePage() {
       {/* ——— Invitation ——— */}
       <section aria-labelledby="cta-title" className="border-t-2 border-brun bg-safran">
         <div className="container-x flex flex-col gap-8 py-16 md:flex-row md:items-center md:justify-between md:py-20">
-          <h2 id="cta-title" className="display max-w-3xl text-[clamp(2.6rem,6.5vw,5rem)]">
-            Les pièces vous attendent sur Etsy.
-          </h2>
-          <div className="flex flex-col gap-3 xs:flex-row">
-            <EtsyShopButton className="btn btn-primary" />
-            {ig ? (
+          <div className="max-w-3xl">
+            <h2 id="cta-title" className="display text-[clamp(2.6rem,6.5vw,5rem)]">
+              {site.etsyShopUrl ? "Les pièces vous attendent sur Etsy." : "Une pièce vous a plu ?"}
+            </h2>
+            {!site.etsyShopUrl && (
+              <p className="mt-4 max-w-xl text-lg">
+                La boutique Etsy ouvre bientôt. En attendant, écrivez à Maison Kayes ou suivez la marque sur Instagram.
+              </p>
+            )}
+          </div>
+          <div className="flex shrink-0 flex-col gap-3 xs:flex-row">
+            {site.etsyShopUrl ? (
+              <EtsyShopButton className="btn btn-primary" />
+            ) : site.contact.email ? (
+              <a href={`mailto:${site.contact.email}`} className="btn btn-primary">
+                Écrire à la marque <span aria-hidden="true">→</span>
+              </a>
+            ) : (
+              <Link href="/contact" className="btn btn-primary">
+                Nous écrire
+              </Link>
+            )}
+            {ig && (
               <a href={ig.url} target="_blank" rel="noopener noreferrer" className="btn btn-ghost">
                 Suivre {ig.handle} <span aria-hidden="true">↗</span>
                 <span className="sr-only">(Instagram, ouvre un nouvel onglet)</span>
               </a>
-            ) : (
-              <Link href="/contact" className="btn btn-ghost">
-                Nous écrire
-              </Link>
             )}
           </div>
         </div>
@@ -272,7 +285,7 @@ function CollectionTile({
       />
       <span className={`absolute bottom-0 left-0 flex flex-col px-5 pb-4 pt-3 ${tag}`}>
         <span className="eyebrow text-[0.72rem]">{label}</span>
-        <span className="display text-[clamp(2.2rem,4.5vw,3.6rem)]">
+        <span className="display mt-1 text-[clamp(2.2rem,4.5vw,3.6rem)]">
           {title} <span aria-hidden="true" className="inline-block transition-transform group-hover:translate-x-1">→</span>
         </span>
       </span>

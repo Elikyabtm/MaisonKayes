@@ -59,6 +59,16 @@ export function Header() {
     };
   }, [open, close]);
 
+  // Logo en badge débordant en haut de page, compact après défilement
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  const compact = scrolled || open;
+
   // Ferme le menu si l’écran passe en desktop
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 64rem)");
@@ -76,9 +86,25 @@ export function Header() {
         Aller au contenu
       </a>
       <div className="container-x flex h-[4.25rem] items-center justify-between gap-6">
-        <Link href="/" aria-label="Maison Kayes — accueil" className="shrink-0" onClick={() => setOpen(false)}>
-          <Logo />
-        </Link>
+        {/* Emplacement réservé : le badge du logo est positionné par-dessus */}
+        <div className="relative h-full w-[5.75rem] shrink-0 sm:w-[6.5rem] lg:w-[8.25rem]">
+          <Link
+            href="/"
+            aria-label="Maison Kayes — accueil"
+            onClick={() => setOpen(false)}
+            className={`absolute left-0 top-0 block bg-creme transition-[padding] duration-300 ${
+              compact ? "p-1.5" : "border-x-2 border-b-2 border-brun p-2 lg:p-2.5"
+            }`}
+          >
+            <Logo
+              priority
+              sizes="(min-width: 64rem) 120px, 96px"
+              className={`transition-[width] duration-300 ${
+                compact ? "w-[3.5rem]" : "w-[5.25rem] sm:w-[6rem] lg:w-[7.5rem]"
+              }`}
+            />
+          </Link>
+        </div>
 
         <nav aria-label="Navigation principale" className="hidden lg:block">
           <ul className="flex items-center gap-1 xl:gap-3">

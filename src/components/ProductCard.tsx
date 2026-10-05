@@ -5,7 +5,7 @@ import { categories, type Product } from "@/data/products";
 export function ProductCard({
   product,
   sizes = "(min-width: 64rem) 30vw, (min-width: 40rem) 45vw, 92vw",
-  aspect = "aspect-[4/5]",
+  aspect = "aspect-[5/6]",
   headingLevel = "h3",
 }: {
   product: Product;
@@ -24,7 +24,7 @@ export function ProductCard({
           fill
           sizes={sizes}
           quality={85}
-          className="object-contain p-[7%] transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+          className="object-contain transition-transform duration-700 ease-out group-hover:scale-[1.03]"
         />
       </div>
       <div className="flex flex-1 flex-col border-b-2 border-brun pb-4 pt-4">

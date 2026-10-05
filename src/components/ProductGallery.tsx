@@ -22,7 +22,12 @@ export function ProductGallery({ images, productName }: { images: ProductImage[]
 
   const go = useCallback((delta: number) => setIndex((i) => (i + delta + count) % count), [count]);
 
-  const open = () => dialogRef.current?.showModal();
+  // L’image agrandie n’est rendue qu’à l’ouverture, puis chargée immédiatement en grande taille.
+  const [zoomed, setZoomed] = useState(false);
+  const open = () => {
+    setZoomed(true);
+    dialogRef.current?.showModal();
+  };
   const close = () => dialogRef.current?.close();
 
   useEffect(() => {
@@ -100,6 +105,7 @@ export function ProductGallery({ images, productName }: { images: ProductImage[]
         aria-label={`${productName} — agrandissement`}
         className="on-dark m-0 h-dvh max-h-none w-screen max-w-none bg-brun/95 p-0 text-creme backdrop:bg-brun/80"
         onClick={(e) => e.target === e.currentTarget && close()}
+        onClose={() => setZoomed(false)}
       >
         <div className="flex h-full flex-col">
           <div className="flex items-center justify-between gap-4 px-4 py-3">
@@ -115,7 +121,18 @@ export function ProductGallery({ images, productName }: { images: ProductImage[]
               className="relative mx-auto h-full"
               style={{ maxWidth: `min(100%, ${current.width * MAX_UPSCALE}px)`, maxHeight: current.height * MAX_UPSCALE }}
             >
-              <Image src={current.src} alt={current.alt} fill quality={85} sizes="100vw" className="object-contain" />
+              {zoomed && (
+                <Image
+                  key={current.src}
+                  src={current.src}
+                  alt={current.alt}
+                  fill
+                  loading="eager"
+                  quality={85}
+                  sizes="100vw"
+                  className="object-contain"
+                />
+              )}
             </div>
           </div>
           {count > 1 && (

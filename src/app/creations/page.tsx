@@ -3,12 +3,13 @@ import { CreationsGrid } from "@/components/CreationsGrid";
 import { PageIntro } from "@/components/PageIntro";
 import { ProductCard } from "@/components/ProductCard";
 import { products } from "@/data/products";
+import { site } from "@/data/site";
 import { pageMetadata } from "@/lib/metadata";
 
 export const metadata = pageMetadata({
   title: "Créations",
   description:
-    "Vêtements, accessoires et lingettes textiles Maison Kayes : chapkas, robe à motifs géométriques et pièces Afro Fusion, disponibles sur Etsy.",
+    "Vêtements, accessoires et lingettes textiles Maison Kayes : chapkas, robe à motifs géométriques et pièces Afro Fusion de Maison Kayes.",
   path: "/creations",
 });
 
@@ -35,7 +36,10 @@ export default function CreationsPage() {
     <>
       <PageIntro eyebrow="Le vestiaire" title="Créations">
         <p>
-          Vêtements, accessoires et lingettes textiles. Chaque pièce se découvre ici et s’achète sur Etsy.
+          Vêtements, accessoires et lingettes textiles.{" "}
+          {site.etsyShopUrl
+            ? "Chaque pièce se découvre ici et s’achète sur Etsy."
+            : "Chaque pièce se découvre ici ; les achats se feront sur Etsy. Pour toute question, contactez la marque."}
         </p>
       </PageIntro>
       <section aria-label="Liste des créations" className="container-x pb-24">

@@ -18,25 +18,25 @@ export const site = {
   description:
     "Maison Kayes, marque de vêtements et accessoires Afro Fusion fondée par Fatoumata Gassama : inspirations africaines, création contemporaine et matières réinventées.",
   /** URL publique du site, utilisée pour les métadonnées et le sitemap. */
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://maisonkayes.fr",
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://maisonkayes.be",
   locale: "fr_FR",
   founder: "Fatoumata Gassama",
 
-  /** Logo fourni (ex. "/images/logo-maison-kayes.svg"). `null` = logotype typographique. */
-  logoSrc: null as string | null,
+  /** Logo officiel (fond transparent, 800 × 790). `null` = logotype typographique. */
+  logoSrc: "/images/logo-maison-kayes.webp" as string | null,
 
   /** Boutique Etsy (page d’accueil de la boutique). */
   etsyShopUrl: null as string | null,
 
   contact: {
-    email: null as string | null,
+    email: "contact@maisonkayes.be" as string | null,
     phone: null as string | null,
     /** Ville ou zone d’activité, si elle doit apparaître. */
     location: null as string | null,
   },
 
   socials: [
-    // { label: "Instagram", handle: "@…", url: "https://www.instagram.com/…" },
+    { label: "Instagram", handle: "@maisonkayes", url: "https://www.instagram.com/maisonkayes/" },
   ] as SocialLink[],
 
   credit: "Conception & développement : Elikya Botomba",

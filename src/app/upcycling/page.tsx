@@ -78,6 +78,47 @@ export default function UpcyclingPage() {
         </ol>
       </section>
 
+      <section aria-labelledby="seconde-vie" className="border-t-2 border-brun bg-creme-deep">
+        <div className="container-x py-20 md:py-28">
+          <div className="grid gap-6 md:grid-cols-12 md:items-end">
+            <h2 id="seconde-vie" className="display md:col-span-7 text-[clamp(2.8rem,7vw,6rem)]">
+              Imaginer une seconde vie
+            </h2>
+            <p className="max-w-md text-lg md:col-span-5">
+              Une veste en denim, deux états : sans puis avec un empiècement graphique ocre. Le principe de
+              l’upcycling en une image.
+            </p>
+          </div>
+          <figure className="mt-12">
+            <div className="grid gap-6 md:grid-cols-2 md:gap-8">
+              {[
+                { label: "Avant", src: "/images/upcycling-veste-denim-avant.webp", alt: "Veste en denim bleu sur un cintre, sans empiècement", tag: "bg-creme text-brun" },
+                { label: "Après", src: "/images/upcycling-veste-denim-apres.webp", alt: "La même veste en denim, ornée d’un empiècement graphique ocre, brun et noir sur la poitrine", tag: "bg-orange text-brun" },
+              ].map((v) => (
+                <div key={v.label} className="relative border-2 border-brun bg-creme">
+                  <div className="relative aspect-[2/3] w-full">
+                    <Image
+                      src={v.src}
+                      alt={v.alt}
+                      fill
+                      sizes="(min-width: 90rem) 42rem, (min-width: 48rem) 46vw, 100vw"
+                      className="object-contain"
+                    />
+                  </div>
+                  <p className={`display absolute left-0 top-0 border-b-2 border-r-2 border-brun px-4 py-2 text-3xl ${v.tag}`}>
+                    {v.label}
+                  </p>
+                </div>
+              ))}
+            </div>
+            <figcaption className="mt-4 max-w-3xl text-sm text-brun-soft">
+              Exemple illustratif d’upcycling — images générées, ne représentant pas une réalisation commercialisée par
+              Maison Kayes.
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
       <section aria-labelledby="regard" className="relative overflow-hidden bg-safran">
         <Triangle className="pointer-events-none absolute -right-10 bottom-0 hidden h-56 w-64 text-orange md:block" />
         <div className="container-x relative grid gap-8 py-20 md:grid-cols-12 md:py-24">

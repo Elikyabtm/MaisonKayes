@@ -13,10 +13,10 @@ export const metadata = pageMetadata({
 });
 
 const details = [
-  { src: "/images/chapka-verte-detail-breloque.webp", w: 198, h: 335, alt: "Breloque dorée en forme de fleur et de feuilles posée sur une doublure blanche", caption: "La breloque dorée" },
-  { src: "/images/chapka-bleue-detail-lien.webp", w: 181, h: 320, alt: "Lien bleu bordé de tissu imprimé jaune et noir", caption: "Le lien imprimé" },
-  { src: "/images/lingettes-textiles-detail.webp", w: 165, h: 359, alt: "Bords superposés de lingettes : tissu imprimé et éponge turquoise", caption: "L’imprimé et l’éponge" },
-  { src: "/images/chapka-verte-detail-lien.webp", w: 170, h: 335, alt: "Lien à imprimé camouflage vert et brun", caption: "Le camouflage" },
+  { src: "/images/chapka-verte-detail-breloque.webp", alt: "Gros plan sur une breloque dorée en forme de fleur et de feuilles, posée sur une doublure blanche", caption: "La breloque dorée", position: "45% 58%" },
+  { src: "/images/chapka-bleue-detail-lien.webp", alt: "Gros plan sur un lien bleu bordé de tissu imprimé jaune et noir", caption: "Le lien imprimé", position: "50% 42%" },
+  { src: "/images/lingettes-textiles-detail.webp", alt: "Pile de lingettes : bords en tissu imprimé et en éponge turquoise", caption: "L’imprimé et l’éponge", position: "50% 50%" },
+  { src: "/images/chapka-verte-detail-lien.webp", alt: "Gros plan sur un lien à imprimé camouflage vert et brun", caption: "Le camouflage", position: "50% 45%" },
 ];
 
 export default function UniversPage() {
@@ -51,13 +51,13 @@ export default function UniversPage() {
               Chaque pièce naît d’un contraste assumé.
             </p>
           </div>
-          <figure className="w-40 self-end md:w-48">
+          <figure className="w-48 self-end sm:w-56 md:w-60">
             <div className="relative aspect-[4/5]">
               <Image
                 src="/images/ambiance-textiles.webp"
-                alt="Tissus indigo à motifs blancs suspendus au soleil (image d’ambiance)"
+                alt="Tissus indigo à motifs blancs suspendus au-dessus de cuves en terre (image d’ambiance)"
                 fill
-                sizes="12rem"
+                sizes="15rem"
                 className="object-cover"
               />
             </div>
@@ -156,8 +156,16 @@ export default function UniversPage() {
             {details.map((d, i) => (
               <li key={d.src} className={i % 2 === 1 ? "md:mt-12" : ""}>
                 <figure>
-                  <div className="relative mx-auto aspect-[1/2]" style={{ maxWidth: d.w * 1.6 }}>
-                    <Image src={d.src} alt={d.alt} fill sizes="(min-width: 48rem) 20vw, 45vw" quality={85} className="object-cover" />
+                  <div className="relative aspect-[3/4]">
+                    <Image
+                      src={d.src}
+                      alt={d.alt}
+                      fill
+                      sizes="(min-width: 48rem) 22vw, 46vw"
+                      quality={85}
+                      className="object-cover"
+                      style={{ objectPosition: d.position }}
+                    />
                   </div>
                   <figcaption className="eyebrow mt-3 text-[0.75rem]">{d.caption}</figcaption>
                 </figure>

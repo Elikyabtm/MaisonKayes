@@ -9,14 +9,14 @@ export const metadata = pageMetadata({
   path: "/contact",
 });
 
-type Channel = { label: string; value: string; href: string; external?: boolean };
+type Channel = { label: string; value: string; href: string; external?: boolean; raw?: boolean };
 
 export default function ContactPage() {
   const { email, phone, location } = site.contact;
   const ig = instagram();
 
   const channels: Channel[] = [
-    email && { label: "E-mail", value: email, href: `mailto:${email}` },
+    email && { label: "E-mail", value: email, href: `mailto:${email}`, raw: true },
     ig && { label: "Instagram", value: ig.handle, href: ig.url, external: true },
     phone && { label: "Téléphone", value: phone, href: `tel:${phone.replace(/\s/g, "")}` },
     ...site.socials
@@ -57,7 +57,7 @@ export default function ContactPage() {
                   className="group flex flex-col gap-1 py-6 transition-colors hover:bg-safran sm:flex-row sm:items-baseline sm:justify-between sm:px-4"
                 >
                   <span className="eyebrow">{c.label}</span>
-                  <span className="display break-all text-[clamp(1.9rem,5vw,3.6rem)]">
+                  <span className={`display break-all text-[clamp(1.9rem,5vw,3.6rem)] ${c.raw ? "normal-case" : ""}`}>
                     {c.value}{" "}
                     <span aria-hidden="true" className="inline-block transition-transform group-hover:translate-x-1">
                       {c.external ? "↗" : "→"}
