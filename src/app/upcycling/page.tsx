@@ -49,7 +49,6 @@ export default function UpcyclingPage() {
               className="object-cover object-[50%_45%]"
             />
           </div>
-          <figcaption className="mt-3 text-sm text-creme/75">Illustration d’ambiance.</figcaption>
         </figure>
       </section>
 

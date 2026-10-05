@@ -107,7 +107,7 @@ export default function HomePage() {
             label="La démarche"
             image={{
               src: "/images/upcycling-patchwork-denim.webp",
-              alt: "Mains cousant une pièce de tissu imprimé sur une veste en denim (visuel d’ambiance)",
+              alt: "Mains cousant une pièce de tissu imprimé sur une veste en denim",
               position: "50% 50%",
             }}
             className="aspect-[4/3] md:col-span-5 md:aspect-auto md:min-h-[20rem]"
@@ -171,7 +171,6 @@ export default function HomePage() {
               />
             </div>
             <Diamond className="absolute -left-5 -top-5 h-10 w-10 text-safran" />
-            <figcaption className="mt-3 text-sm text-creme/75">Visuel d’ambiance.</figcaption>
           </figure>
         </div>
       </section>

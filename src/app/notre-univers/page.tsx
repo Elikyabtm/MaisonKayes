@@ -55,13 +55,12 @@ export default function UniversPage() {
             <div className="relative aspect-[4/5]">
               <Image
                 src="/images/ambiance-textiles.webp"
-                alt="Tissus indigo à motifs blancs suspendus au-dessus de cuves en terre (image d’ambiance)"
+                alt="Tissus indigo à motifs blancs suspendus au-dessus de cuves en terre"
                 fill
                 sizes="15rem"
                 className="object-cover"
               />
             </div>
-            <figcaption className="mt-2 text-sm text-brun-soft">Image d’ambiance.</figcaption>
           </figure>
         </div>
       </section>
@@ -119,25 +118,23 @@ export default function UniversPage() {
             <div className="relative aspect-[3/4]">
               <Image
                 src="/images/ambiance-architecture.webp"
-                alt="Architecture de terre crue et palmier sous un ciel bleu (image d’ambiance)"
+                alt="Architecture de terre crue et palmier sous un ciel bleu"
                 fill
                 sizes="(min-width: 48rem) 22vw, 45vw"
                 className="object-cover"
               />
             </div>
-            <figcaption className="mt-2 text-sm text-brun-soft">Image d’ambiance.</figcaption>
           </figure>
           <figure>
             <div className="relative aspect-[3/5]">
               <Image
                 src="/images/ambiance-paysage.webp"
-                alt="Paysage au coucher du soleil, palmiers et bâtiments ocre (image d’ambiance)"
+                alt="Paysage au coucher du soleil, palmiers et bâtiments ocre"
                 fill
                 sizes="(min-width: 48rem) 22vw, 45vw"
                 className="object-cover"
               />
             </div>
-            <figcaption className="mt-2 text-sm text-brun-soft">Image d’ambiance.</figcaption>
           </figure>
           <Diamond className="absolute -bottom-4 left-[46%] h-8 w-8 text-orange" />
         </div>
