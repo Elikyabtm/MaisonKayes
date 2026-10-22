@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { categories, hasUpcycledProducts, products, type Category } from "@/data/products";
+import type { Offer } from "@/lib/shop";
 import { ProductCard } from "./ProductCard";
 
 type Filter = "tout" | Category | "upcycling";
@@ -18,7 +19,7 @@ function useFilters(): { value: Filter; label: string }[] {
   return list;
 }
 
-export function CreationsGrid() {
+export function CreationsGrid({ offers }: { offers: Record<string, Offer> }) {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -63,7 +64,7 @@ export function CreationsGrid() {
         <ul className="mt-10 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
           {visible.map((p) => (
             <li key={p.id}>
-              <ProductCard product={p} headingLevel="h2" />
+              <ProductCard product={p} offer={offers[p.slug]} headingLevel="h2" />
             </li>
           ))}
         </ul>

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { legalNav, mainNav, site } from "@/data/site";
-import { EtsyShopButton } from "./EtsyLinks";
+import { ShopButton } from "./ShopLinks";
 import { Frieze } from "./Frieze";
 import { Logo } from "./Logo";
 
@@ -20,7 +20,7 @@ export function Footer() {
             Vêtements & accessoires Afro Fusion, entre héritage et matières réinventées.
           </p>
           <div className="mt-6">
-            <EtsyShopButton />
+            <ShopButton />
           </div>
         </div>
 

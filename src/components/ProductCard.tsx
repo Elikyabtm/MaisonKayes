@@ -1,14 +1,17 @@
 import Image from "next/image";
 import Link from "next/link";
 import { categories, type Product } from "@/data/products";
+import type { Offer } from "@/lib/shop";
 
 export function ProductCard({
   product,
+  offer,
   sizes = "(min-width: 64rem) 30vw, (min-width: 40rem) 45vw, 92vw",
   aspect = "aspect-[5/6]",
   headingLevel = "h3",
 }: {
   product: Product;
+  offer?: Offer;
   sizes?: string;
   aspect?: string;
   headingLevel?: "h2" | "h3";
@@ -34,7 +37,12 @@ export function ProductCard({
             {product.name}
           </Link>
         </Heading>
-        {product.price && <p className="mt-1 text-brun-soft">{product.price}</p>}
+        {offer && (
+          <p className="mt-1 flex items-center gap-2 text-brun-soft">
+            {offer.price}
+            {!offer.available && <span className="eyebrow bg-brun px-1.5 py-0.5 text-[0.65rem] text-creme">Vendu</span>}
+          </p>
+        )}
         <span className="link-arrow mt-4 self-start" aria-hidden="true">
           Découvrir la pièce <span className="transition-transform group-hover:translate-x-1">→</span>
         </span>

@@ -1,14 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BuyOnEtsy } from "@/components/EtsyLinks";
+import { Suspense } from "react";
+import { BuyBox } from "@/components/BuyBox";
+import { CheckoutNotice } from "@/components/CheckoutNotice";
 import { Frieze } from "@/components/Frieze";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductGallery } from "@/components/ProductGallery";
 import { categories, getProduct, products } from "@/data/products";
 import { pageMetadata } from "@/lib/metadata";
+import { getOffers, getZoneRates } from "@/lib/shop";
 
-export const dynamicParams = false;
+/** Prix et stock relus dans Stripe au plus toutes les 60 s (et immédiatement après une vente). */
+export const revalidate = 60;
 
 export function generateStaticParams() {
   return products.map((p) => ({ slug: p.slug }));
@@ -32,6 +36,8 @@ export default async function ProductPage({ params }: PageProps<"/creations/[slu
   const product = getProduct(slug);
   if (!product) notFound();
 
+  const [offers, zones] = await Promise.all([getOffers(), getZoneRates()]);
+  const offer = offers[product.slug] ?? null;
   const category = categories[product.category];
   const others = [
     ...products.filter((p) => p.slug !== product.slug && p.category === product.category),
@@ -69,7 +75,7 @@ export default async function ProductPage({ params }: PageProps<"/creations/[slu
           <div className="lg:sticky lg:top-28">
             <p className="eyebrow text-ocre-ink">{category.singular}</p>
             <h1 className="display mt-3 text-[clamp(2.8rem,6vw,4.75rem)]">{product.name}</h1>
-            {product.price && <p className="mt-4 text-2xl font-bold">{product.price}</p>}
+            {offer && <p className="mt-4 text-2xl font-bold">{offer.price}</p>}
             <p className="mt-6 text-lg">{product.description}</p>
 
             {product.features.length > 0 && (
@@ -89,7 +95,10 @@ export default async function ProductPage({ params }: PageProps<"/creations/[slu
             )}
 
             <div className="mt-8">
-              <BuyOnEtsy url={product.etsyUrl} productName={product.name} />
+              <Suspense fallback={null}>
+                <CheckoutNotice />
+              </Suspense>
+              <BuyBox product={product} offer={offer} zones={zones} />
             </div>
           </div>
         </div>
@@ -109,7 +118,7 @@ export default async function ProductPage({ params }: PageProps<"/creations/[slu
         <ul className="mt-10 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
           {others.map((p) => (
             <li key={p.id}>
-              <ProductCard product={p} />
+              <ProductCard product={p} offer={offers[p.slug]} />
             </li>
           ))}
         </ul>

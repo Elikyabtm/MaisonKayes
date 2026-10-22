@@ -3,8 +3,9 @@
  *
  * Règles :
  * - Les noms sont provisoires et descriptifs : les modifier ici suffit.
- * - Ne renseigner `price`, `etsyUrl` et `features` qu’avec des informations confirmées.
- *   Un champ vide ou `null` est masqué sur le site.
+ * - Le prix et le stock se gèrent dans Stripe (prix par défaut du produit et métadonnée `stock`).
+ *   Ici, il suffit de renseigner `stripeProductId` (identifiant `prod_…`).
+ * - Ne renseigner `features` qu’avec des informations confirmées.
  * - `upcycled: true` uniquement si la pièce est confirmée comme upcyclée
  *   (le filtre « Upcycling » apparaît automatiquement dès qu’une pièce l’est).
  */
@@ -37,12 +38,10 @@ export type Product = {
   description: string;
   /** Première image = photo produit ; seconde = photo portée si elle existe. */
   images: ProductImage[];
-  /** Prix affiché tel quel, ex. « 45 € ». `null` = masqué. */
-  price: string | null;
   /** Caractéristiques confirmées uniquement. */
   features: string[];
-  /** Lien vers la fiche Etsy. `null` = invitation à contacter la marque. */
-  etsyUrl: string | null;
+  /** Produit Stripe (`prod_…`). `null` = pas encore en vente : invitation à contacter la marque. */
+  stripeProductId: string | null;
   upcycled: boolean;
 };
 
@@ -61,14 +60,13 @@ export const products: Product[] = [
       { src: "/images/chapka-verte-detail-breloque.webp", width: 964, height: 1632, kind: "detail", position: "50% 55%", alt: "Gros plan sur la breloque dorée en forme de fleur et de feuilles, posée sur la doublure blanche" },
       { src: "/images/chapka-verte-detail-lien.webp", width: 893, height: 1760, kind: "detail", position: "50% 50%", alt: "Gros plan sur le lien de serrage à imprimé camouflage" },
     ],
-    price: null,
     features: [
       "Imprimé camouflage vert, kaki et brun",
       "Doublure et rabats blancs à poils longs",
       "Cache-oreilles avec liens",
       "Breloque dorée sur le rabat avant",
     ],
-    etsyUrl: null,
+    stripeProductId: null,
     upcycled: false,
   },
   {
@@ -85,14 +83,13 @@ export const products: Product[] = [
       { src: "/images/chapka-bleue-detail-breloque.webp", width: 1049, height: 1499, kind: "detail", position: "50% 60%", alt: "Gros plan sur la breloque dorée posée sur la doublure blanche, tissu bleu à motifs dorés en arrière-plan" },
       { src: "/images/chapka-bleue-detail-lien.webp", width: 941, height: 1672, kind: "detail", position: "50% 45%", alt: "Gros plan sur le lien bleu bordé de tissu imprimé jaune et noir, posé sur une pierre ocre" },
     ],
-    price: null,
     features: [
       "Tissu bleu roi à motifs géométriques dorés",
       "Doublure et rabats blancs à poils longs",
       "Cache-oreilles avec liens",
       "Breloque dorée sur le rabat avant",
     ],
-    etsyUrl: null,
+    stripeProductId: null,
     upcycled: false,
   },
   {
@@ -106,13 +103,12 @@ export const products: Product[] = [
       { src: "/images/chapka-marbree-produit.webp", width: 1254, height: 1254, kind: "produit", position: "50% 55%", alt: "Chapka à tissu marbré bleu nuit, brique et blanc, avec doublure bouclée camouflage, sur fond crème" },
       { src: "/images/chapka-marbree-portee.webp", width: 1122, height: 1402, kind: "portee", position: "50% 25%", alt: "Mannequin portant la chapka marbrée à doublure camouflage, lumière dorée" },
     ],
-    price: null,
     features: [
       "Tissu à effet marbré bleu nuit, brique et blanc",
       "Doublure bouclée à motif camouflage",
       "Cache-oreilles",
     ],
-    etsyUrl: null,
+    stripeProductId: null,
     upcycled: false,
   },
   {
@@ -127,14 +123,13 @@ export const products: Product[] = [
       { src: "/images/lingettes-textiles-plateau.webp", width: 1197, height: 1314, kind: "scene", position: "50% 55%", alt: "Lingettes textiles présentées dans un plateau en bois" },
       { src: "/images/lingettes-textiles-detail.webp", width: 827, height: 1800, kind: "detail", position: "50% 50%", alt: "Pile de lingettes sur un panier en rotin, détail du tissu imprimé et de l’éponge turquoise" },
     ],
-    price: null,
     features: [
       "Format carré",
       "Une face en tissu imprimé jaune, fuchsia et noir",
       "Une face éponge turquoise",
       "Étiquette cousue",
     ],
-    etsyUrl: null,
+    stripeProductId: null,
     upcycled: false,
   },
   {
@@ -148,13 +143,12 @@ export const products: Product[] = [
       { src: "/images/robe-geometrique-produit.webp", width: 1051, height: 1497, kind: "produit", alt: "Robe noire à motifs géométriques jaunes et pois rouges, ourlet bordé de rouge, sur un cintre" },
       { src: "/images/robe-geometrique-portee.webp", width: 1024, height: 1536, kind: "portee", position: "50% 30%", alt: "Mannequin portant la robe à motifs géométriques contre un mur ocre" },
     ],
-    price: null,
     features: [
       "Coupe ample, manches courtes",
       "Fond noir, lignes jaunes et pois rouges",
       "Ourlet souligné d’une bordure rouge",
     ],
-    etsyUrl: null,
+    stripeProductId: null,
     upcycled: false,
   },
 ];

@@ -17,7 +17,7 @@ export default function MentionsLegalesPage() {
             "Nom ou dénomination sociale et forme juridique",
             "Responsable de la publication : Fatoumata Gassama (à confirmer)",
             "Adresse du siège ou de domiciliation",
-            "Numéro SIREN / SIRET ou immatriculation (RCS, RNE…)",
+            "Numéro d’entreprise (BCE)",
             "Numéro de TVA intracommunautaire, le cas échéant",
             "Adresse e-mail et/ou téléphone de contact",
           ],
@@ -41,7 +41,7 @@ export default function MentionsLegalesPage() {
         {
           title: "Achats",
           items: [
-            "Les achats et paiements s’effectuent sur Etsy : renvoyer vers les conditions de la boutique Etsy (lien à renseigner).",
+            "Vente en ligne régie par les conditions générales de vente ; paiements traités par Stripe.",
           ],
         },
       ]}

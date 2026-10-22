@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { mainNav } from "@/data/site";
-import { EtsyShopButton } from "./EtsyLinks";
+import { ShopButton } from "./ShopLinks";
 import { Logo } from "./Logo";
 import { Diamond } from "./Shapes";
 
@@ -128,7 +128,7 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <EtsyShopButton className="btn btn-orange hidden min-h-11 px-4 py-2 text-[0.85rem] sm:inline-flex" />
+          <ShopButton className="btn btn-orange hidden min-h-11 px-4 py-2 text-[0.85rem] sm:inline-flex" />
           <button
             ref={toggleRef}
             type="button"
@@ -176,7 +176,7 @@ export function Header() {
             })}
           </ul>
           <div className="mt-8">
-            <EtsyShopButton className="btn btn-orange w-full text-base" onClick={() => setOpen(false)} />
+            <ShopButton className="btn btn-orange w-full text-base" onClick={() => setOpen(false)} />
           </div>
         </nav>
       </div>

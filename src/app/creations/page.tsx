@@ -3,8 +3,8 @@ import { CreationsGrid } from "@/components/CreationsGrid";
 import { PageIntro } from "@/components/PageIntro";
 import { ProductCard } from "@/components/ProductCard";
 import { products } from "@/data/products";
-import { site } from "@/data/site";
 import { pageMetadata } from "@/lib/metadata";
+import { getOffers, type Offer } from "@/lib/shop";
 
 export const metadata = pageMetadata({
   title: "Créations",
@@ -13,8 +13,10 @@ export const metadata = pageMetadata({
   path: "/creations",
 });
 
+export const revalidate = 60;
+
 /** Rendu statique sans filtre (avant hydratation ou sans JavaScript). */
-function AllProducts() {
+function AllProducts({ offers }: { offers: Record<string, Offer> }) {
   return (
     <div>
       <div className="border-y-2 border-brun py-4">
@@ -23,7 +25,7 @@ function AllProducts() {
       <ul className="mt-10 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
         {products.map((p) => (
           <li key={p.id}>
-            <ProductCard product={p} headingLevel="h2" />
+            <ProductCard product={p} offer={offers[p.slug]} headingLevel="h2" />
           </li>
         ))}
       </ul>
@@ -31,20 +33,21 @@ function AllProducts() {
   );
 }
 
-export default function CreationsPage() {
+export default async function CreationsPage() {
+  const offers = await getOffers();
   return (
     <>
       <PageIntro eyebrow="Le vestiaire" title="Créations">
         <p>
           Vêtements, accessoires et lingettes textiles.{" "}
-          {site.etsyShopUrl
-            ? "Chaque pièce se découvre ici et s’achète sur Etsy."
-            : "Chaque pièce se découvre ici ; les achats se feront sur Etsy. Pour toute question, contactez la marque."}
+          {Object.keys(offers).length > 0
+            ? "Chaque pièce se découvre ici et se commande directement sur le site, avec paiement sécurisé."
+            : "La boutique en ligne ouvre bientôt : pour toute question sur une pièce, contactez la marque."}
         </p>
       </PageIntro>
       <section aria-label="Liste des créations" className="container-x pb-24">
-        <Suspense fallback={<AllProducts />}>
-          <CreationsGrid />
+        <Suspense fallback={<AllProducts offers={offers} />}>
+          <CreationsGrid offers={offers} />
         </Suspense>
       </section>
     </>

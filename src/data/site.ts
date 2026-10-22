@@ -2,7 +2,8 @@
  * Configuration centrale de Maison Kayes.
  *
  * Toute valeur laissée à `null` est masquée sur le site (aucun faux lien).
- * Renseigner ici les coordonnées confirmées, les réseaux et la boutique Etsy.
+ * Renseigner ici les coordonnées confirmées et les réseaux. Les clés Stripe se configurent
+ * par variables d’environnement (voir .env.example).
  */
 
 export type SocialLink = {
@@ -24,9 +25,6 @@ export const site = {
 
   /** Logo officiel (fond transparent, 800 × 790). `null` = logotype typographique. */
   logoSrc: "/images/logo-maison-kayes.webp" as string | null,
-
-  /** Boutique Etsy (page d’accueil de la boutique). */
-  etsyShopUrl: null as string | null,
 
   contact: {
     email: "contact@maisonkayes.be" as string | null,
@@ -52,6 +50,7 @@ export const mainNav = [
 ] as const;
 
 export const legalNav = [
+  { href: "/conditions-generales-de-vente", label: "Conditions de vente" },
   { href: "/mentions-legales", label: "Mentions légales" },
   { href: "/confidentialite", label: "Confidentialité" },
 ] as const;

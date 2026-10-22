@@ -22,7 +22,6 @@ export default function ContactPage() {
     ...site.socials
       .filter((s) => s !== ig)
       .map((s) => ({ label: s.label, value: s.handle, href: s.url, external: true })),
-    site.etsyShopUrl && { label: "Etsy", value: "Messagerie de la boutique", href: site.etsyShopUrl, external: true },
   ].filter(Boolean) as Channel[];
 
   return (

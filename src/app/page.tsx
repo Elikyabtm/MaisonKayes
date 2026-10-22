@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { EtsyShopButton } from "@/components/EtsyLinks";
 import { Frieze } from "@/components/Frieze";
 import { Marquee } from "@/components/Marquee";
 import { ProductCard } from "@/components/ProductCard";
@@ -9,6 +8,7 @@ import { about } from "@/data/content";
 import { getProduct, homeSelection, type Product } from "@/data/products";
 import { instagram, site } from "@/data/site";
 import { pageMetadata } from "@/lib/metadata";
+import { getOffers } from "@/lib/shop";
 
 export const metadata = pageMetadata({
   description:
@@ -16,7 +16,10 @@ export const metadata = pageMetadata({
   path: "/",
 });
 
-export default function HomePage() {
+export const revalidate = 60;
+
+export default async function HomePage() {
+  const offers = await getOffers();
   const selection = homeSelection.map(getProduct).filter(Boolean) as Product[];
   const ig = instagram();
 
@@ -130,7 +133,7 @@ export default function HomePage() {
           <ul className="mt-12 grid gap-x-5 gap-y-12 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
             {selection.map((p, i) => (
               <li key={p.id} className={i % 2 === 1 ? "lg:mt-20" : ""}>
-                <ProductCard product={p} sizes="(min-width: 64rem) 20vw, (min-width: 48rem) 32vw, (min-width: 26rem) 48vw, 92vw" />
+                <ProductCard product={p} offer={offers[p.slug]} sizes="(min-width: 64rem) 20vw, (min-width: 48rem) 32vw, (min-width: 26rem) 48vw, 92vw" />
               </li>
             ))}
           </ul>
@@ -222,31 +225,29 @@ export default function HomePage() {
         <div className="container-x flex flex-col gap-8 py-16 md:flex-row md:items-center md:justify-between md:py-20">
           <div className="max-w-3xl">
             <h2 id="cta-title" className="display text-[clamp(2.6rem,6.5vw,5rem)]">
-              {site.etsyShopUrl ? "Les pièces vous attendent sur Etsy." : "Une pièce vous a plu ?"}
+              Une pièce vous a plu ?
             </h2>
-            {!site.etsyShopUrl && (
-              <p className="mt-4 max-w-xl text-lg">
-                La boutique Etsy ouvre bientôt. En attendant, écrivez à Maison Kayes ou suivez la marque sur Instagram.
-              </p>
-            )}
+            <p className="mt-4 max-w-xl text-lg">
+              {Object.keys(offers).length > 0
+                ? "Commandez-la directement sur le site, avec paiement sécurisé et livraison en Europe. Une question ? Écrivez à Maison Kayes."
+                : "La boutique en ligne ouvre bientôt. En attendant, écrivez à Maison Kayes ou suivez la marque sur Instagram."}
+            </p>
           </div>
           <div className="flex shrink-0 flex-col gap-3 xs:flex-row">
-            {site.etsyShopUrl ? (
-              <EtsyShopButton className="btn btn-primary" />
-            ) : site.contact.email ? (
-              <a href={`mailto:${site.contact.email}`} className="btn btn-primary">
-                Écrire à la marque <span aria-hidden="true">→</span>
+            <Link href="/creations" className="btn btn-primary">
+              La boutique <span aria-hidden="true">→</span>
+            </Link>
+            {site.contact.email ? (
+              <a href={`mailto:${site.contact.email}`} className="btn btn-ghost">
+                Écrire à la marque
               </a>
             ) : (
-              <Link href="/contact" className="btn btn-primary">
-                Nous écrire
-              </Link>
-            )}
-            {ig && (
-              <a href={ig.url} target="_blank" rel="noopener noreferrer" className="btn btn-ghost">
-                Suivre {ig.handle} <span aria-hidden="true">↗</span>
-                <span className="sr-only">(Instagram, ouvre un nouvel onglet)</span>
-              </a>
+              ig && (
+                <a href={ig.url} target="_blank" rel="noopener noreferrer" className="btn btn-ghost">
+                  Suivre {ig.handle} <span aria-hidden="true">↗</span>
+                  <span className="sr-only">(Instagram, ouvre un nouvel onglet)</span>
+                </a>
+              )
             )}
           </div>
         </div>
