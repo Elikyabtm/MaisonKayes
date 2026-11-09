@@ -48,6 +48,36 @@ npm run admin -- list
 En local avec PGlite, arrêter `npm run dev` avant de lancer ces commandes.
 Après une modification de `src/db/schema.ts` : `npm run db:generate` crée la migration SQL correspondante.
 
+## Comptes clients (`/compte`)
+
+Facultatifs : on peut toujours commander sans compte. Lien « Mon compte » dans l’en-tête.
+
+- **Inscription / connexion** (`/compte/inscription`, `/compte/connexion`), mot de passe de 10 caractères minimum,
+  tentatives limitées. Session de 30 jours dans un cookie `mk_client`, distinct de celui des administrateurs :
+  un compte client n’ouvre jamais le dashboard.
+- **Confirmation de l’adresse e-mail** (lien valable 48 h, envoyé via Resend). Les commandes passées sans compte avec
+  cette adresse ne sont rattachées qu’**après** confirmation : personne ne peut voir les commandes d’un autre en
+  créant un compte à son adresse.
+- **Mes commandes** : statut (en préparation, expédiée, livrée, annulée), articles, total payé, lien de suivi.
+- **Adresse enregistrée** : pré-remplie sur la page de paiement Stripe (via un client Stripe), et enregistrée
+  automatiquement après la première commande.
+- **Mot de passe oublié** : lien valable 1 h, à usage unique ; même réponse que l’adresse ait un compte ou non.
+- **Newsletter** : case non cochée par défaut, date du consentement conservée, désinscription depuis le compte.
+  Export CSV des inscrits dans le dashboard (`/admin/clients`).
+- **Suppression du compte** par le client ; les commandes sont conservées sans lien avec un compte.
+
+## Mise en ligne et accès au dashboard
+
+Le dashboard est sur `https://<domaine>/admin` (en local : `http://localhost:3000/admin`). Pour le mettre en ligne :
+
+1. Déployer le dépôt chez un hébergeur Next.js (Vercel recommandé) et y relier le domaine.
+2. Créer une base Postgres (Neon, Supabase ou Vercel Postgres) et renseigner `DATABASE_URL`.
+3. Renseigner les autres variables de `.env.example` (Stripe, Resend, `NEXT_PUBLIC_SITE_URL`).
+4. Depuis un ordinateur où se trouve le projet, avec `DATABASE_URL` pointant vers la base en ligne :
+   `npm run admin -- create contact@maisonkayes.be --name "Fatoumata Gassama"`.
+5. Se connecter sur `https://<domaine>/admin` (ordinateur ou téléphone) et ajouter la page aux favoris :
+   il n’y a volontairement aucun lien vers le dashboard sur le site public.
+
 ## Dashboard `/admin`
 
 Accès réservé aux comptes administrateurs actifs : la session (cookie `httpOnly`, 7 jours, stockée en base)
@@ -61,6 +91,7 @@ et 20 par adresse IP sur 15 minutes.
   Le statut de paiement (payé, en attente, échoué, remboursé) se met à jour automatiquement via Stripe.
 - **Stocks** : quantité par variante, ajout / retrait / inventaire avec motif et note, seuil d’alerte, historique des mouvements.
   Une quantité inconnue s’affiche « Stock à renseigner » : la pièce ne peut pas être commandée tant qu’elle n’est pas renseignée.
+- **Clients** : comptes clients, confirmation de l’e-mail, nombre de commandes, inscrits à la newsletter (export CSV).
 - **Catalogue** : nom, catégorie, description, caractéristiques, prix, visibilité, ordre des fiches (les cinq premières
   fiches visibles forment la sélection de l’accueil), variantes, photos (import, texte alternatif, ordre, suppression).
   L’adresse d’une fiche (`/creations/<slug>`) ne change jamais.

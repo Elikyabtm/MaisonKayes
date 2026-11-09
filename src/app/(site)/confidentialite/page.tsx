@@ -23,7 +23,9 @@ export default function ConfidentialitePage() {
           title: "Données collectées par le site",
           items: [
             "Commandes : nom, adresse de livraison, e-mail et téléphone saisis lors du paiement ; finalité (exécution de la commande) et durée de conservation à préciser.",
-            "Le site ne comporte ni compte client ni formulaire de contact.",
+            "Compte client (facultatif) : nom, e-mail, mot de passe chiffré, téléphone et adresse de livraison si renseignés ; le client peut les modifier ou supprimer son compte à tout moment depuis son espace.",
+            "Newsletter : inscription uniquement sur consentement explicite (case non cochée par défaut), date du consentement conservée, désinscription depuis le compte.",
+            "Cookies strictement nécessaires : session du compte client et de l’administration (aucun cookie publicitaire ni de mesure d’audience).",
             "Journaux techniques de l’hébergeur (adresse IP, date, page consultée) : durée de conservation à préciser.",
             "Mesure d’audience et cookies : aucun outil installé à ce jour ; à mettre à jour si un outil est ajouté.",
           ],

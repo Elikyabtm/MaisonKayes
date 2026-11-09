@@ -1,5 +1,5 @@
 import "server-only";
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNotNull } from "drizzle-orm";
 import type Stripe from "stripe";
 import { getZone } from "@/data/shipping";
 import { getDb, schema } from "@/db";
@@ -8,7 +8,7 @@ import { sendPaidOrderEmails } from "./email/order-emails";
 import { moveStock, StockError } from "./inventory";
 import { revalidateProducts } from "./revalidate";
 
-const { orders, orderItems, variants } = schema;
+const { orders, orderItems, variants, customers } = schema;
 
 export const orderReference = (id: number) => `MK-${String(id).padStart(5, "0")}`;
 
@@ -39,12 +39,22 @@ export async function recordCheckout(stripe: Stripe, sessionId: string) {
   const [existing] = await db.select({ id: orders.id }).from(orders).where(eq(orders.stripeSessionId, session.id)).limit(1);
   if (existing) return { created: false as const };
 
+  // Compte client : celui connecté au moment du paiement, sinon un compte à l’adresse confirmée.
+  const metaCustomer = Number(session.metadata?.customerId) || null;
+  const email = session.customer_details?.email?.toLowerCase() ?? null;
+  const [account] = metaCustomer
+    ? await db.select().from(customers).where(eq(customers.id, metaCustomer)).limit(1)
+    : email
+      ? await db.select().from(customers).where(and(eq(customers.email, email), isNotNull(customers.emailVerifiedAt))).limit(1)
+      : [];
+
   const result = await db.transaction(async (tx) => {
     const [order] = await tx
       .insert(orders)
       .values({
         stripeSessionId: session.id,
         stripePaymentIntentId: intentId(session),
+        customerId: account?.id ?? null,
         customerName: session.customer_details?.name ?? null,
         customerEmail: session.customer_details?.email ?? null,
         customerPhone: session.customer_details?.phone ?? null,
@@ -120,6 +130,25 @@ export async function recordCheckout(stripe: Stripe, sessionId: string) {
     await refundOrder(stripe, result.orderId, session.payment_intent, "stock_epuise");
   }
   if (result.created) await revalidateProducts([result.productId]);
+  // Première commande d’un compte sans adresse enregistrée : on garde l’adresse de livraison.
+  if (result.created && account && !account.shippingAddress && shipping?.address?.line1) {
+    const s = shipping.address;
+    await db
+      .update(customers)
+      .set({
+        shippingAddress: {
+          name: shipping.name ?? account.name,
+          line1: s.line1 ?? null,
+          line2: s.line2 ?? null,
+          postalCode: s.postal_code ?? null,
+          city: s.city ?? null,
+          state: s.state ?? null,
+          country: s.country ?? null,
+        },
+        updatedAt: new Date(),
+      })
+      .where(eq(customers.id, account.id));
+  }
   // Commande enregistrée et payée : confirmation au client et notification interne (une seule fois chacune).
   if (result.created && !result.oversold && paymentStatusOf(session) === "paye") {
     await sendPaidOrderEmails(result.orderId);

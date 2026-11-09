@@ -130,6 +130,61 @@ export const loginAttempts = pgTable(
   (t) => [index("login_attempts_lookup_idx").on(t.email, t.createdAt), index("login_attempts_ip_idx").on(t.ip, t.createdAt)],
 );
 
+/* ——— Comptes clients ——— */
+
+export type SavedAddress = PostalAddress & { name: string | null };
+
+export const customers = pgTable("customers", {
+  id: serial().primaryKey(),
+  /** En minuscules. */
+  email: text().notNull().unique(),
+  name: text().notNull(),
+  passwordHash: text().notNull(),
+  /** Tant que l’e-mail n’est pas confirmé, aucune commande passée sans compte n’est rattachée. */
+  emailVerifiedAt: timestamp({ withTimezone: true }),
+  phone: text(),
+  shippingAddress: jsonb().$type<SavedAddress>(),
+  newsletter: boolean().notNull().default(false),
+  /** Date du consentement (ou du retrait) à la newsletter. */
+  newsletterUpdatedAt: timestamp({ withTimezone: true }),
+  stripeCustomerId: text(),
+  createdAt: now(),
+  updatedAt: now(),
+  lastLoginAt: timestamp({ withTimezone: true }),
+});
+
+export const customerSessions = pgTable(
+  "customer_sessions",
+  {
+    tokenHash: text().primaryKey(),
+    customerId: integer()
+      .notNull()
+      .references(() => customers.id, { onDelete: "cascade" }),
+    expiresAt: timestamp({ withTimezone: true }).notNull(),
+    createdAt: now(),
+  },
+  (t) => [index("customer_sessions_customer_idx").on(t.customerId)],
+);
+
+export const customerTokenPurposes = ["verification", "reinitialisation"] as const;
+export type CustomerTokenPurpose = (typeof customerTokenPurposes)[number];
+
+/** Jetons à usage unique envoyés par e-mail (confirmation d’adresse, réinitialisation du mot de passe). */
+export const customerTokens = pgTable(
+  "customer_tokens",
+  {
+    tokenHash: text().primaryKey(),
+    customerId: integer()
+      .notNull()
+      .references(() => customers.id, { onDelete: "cascade" }),
+    purpose: text().$type<CustomerTokenPurpose>().notNull(),
+    expiresAt: timestamp({ withTimezone: true }).notNull(),
+    usedAt: timestamp({ withTimezone: true }),
+    createdAt: now(),
+  },
+  (t) => [index("customer_tokens_customer_idx").on(t.customerId, t.purpose)],
+);
+
 /* ——— Commandes ——— */
 
 export const paymentStatuses = ["en_attente", "paye", "echoue", "rembourse", "partiellement_rembourse"] as const;
@@ -153,6 +208,8 @@ export const orders = pgTable(
     reference: text().unique(),
     stripeSessionId: text().notNull().unique(),
     stripePaymentIntentId: text(),
+    /** Compte client rattaché (commande passée connecté, ou e-mail confirmé). */
+    customerId: integer().references(() => customers.id, { onDelete: "set null" }),
     customerName: text(),
     customerEmail: text(),
     customerPhone: text(),
@@ -184,6 +241,7 @@ export const orders = pgTable(
     index("orders_created_idx").on(t.createdAt),
     index("orders_fulfillment_idx").on(t.fulfillmentStatus),
     index("orders_payment_intent_idx").on(t.stripePaymentIntentId),
+    index("orders_customer_idx").on(t.customerId),
   ],
 );
 

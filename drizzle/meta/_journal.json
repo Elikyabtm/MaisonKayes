@@ -15,6 +15,13 @@
       "when": 1794255209318,
       "tag": "0001_order_emails",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794255949884,
+      "tag": "0002_customer_accounts",
+      "breakpoints": true
     }
   ]
 }

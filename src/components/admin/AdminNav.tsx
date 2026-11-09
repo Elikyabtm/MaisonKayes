@@ -8,13 +8,14 @@ const items: { href: string; label: string; short?: string }[] = [
   { href: "/admin/commandes", label: "Commandes" },
   { href: "/admin/stocks", label: "Stocks" },
   { href: "/admin/catalogue", label: "Catalogue" },
+  { href: "/admin/clients", label: "Clients" },
 ];
 
 export function AdminNav({ toPrepare }: { toPrepare: number }) {
   const pathname = usePathname();
   return (
-    <nav aria-label="Administration" className="mx-auto max-w-7xl overflow-x-auto px-4 md:px-6">
-      <ul className="flex min-w-max gap-1">
+    <nav aria-label="Administration" className="mx-auto max-w-7xl px-2 md:px-6">
+      <ul className="flex flex-wrap gap-x-1">
         {items.map((item) => {
           const active = item.href === "/admin" ? pathname === "/admin" : pathname.startsWith(item.href);
           return (

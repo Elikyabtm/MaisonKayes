@@ -5,6 +5,8 @@ import { DEFAULT_VARIANT } from "@/data/catalog-types";
 import { getZone } from "@/data/shipping";
 import { site } from "@/data/site";
 import { getDb, schema } from "@/db";
+import { getCurrentCustomer } from "@/lib/customer/session";
+import { syncStripeCustomer } from "@/lib/customer/stripe-customer";
 import { getStripe } from "@/lib/stripe";
 
 /** Quantité maximale par commande. */
@@ -51,6 +53,10 @@ export async function POST(request: Request) {
     .orderBy(schema.productImages.sort)
     .limit(1);
 
+  // Client connecté (facultatif) : e-mail et adresse pré-remplis, commande rattachée au compte.
+  const customer = await getCurrentCustomer();
+  const stripeCustomerId = customer ? await syncStripeCustomer(stripe, customer) : null;
+
   const label = variant.name === DEFAULT_VARIANT ? product.name : `${product.name} — ${variant.name}`;
   const max = Math.min(variant.stock, MAX_QUANTITY);
   try {
@@ -78,7 +84,18 @@ export async function POST(request: Request) {
       },
       shipping_options: [{ shipping_rate: rateId }],
       phone_number_collection: { enabled: true },
-      metadata: { productId: product.id, productName: product.name, variantId: String(variant.id), zone: zone.id },
+      ...(stripeCustomerId
+        ? { customer: stripeCustomerId, customer_update: { shipping: "auto" as const } }
+        : customer
+          ? { customer_email: customer.email }
+          : {}),
+      metadata: {
+        productId: product.id,
+        productName: product.name,
+        variantId: String(variant.id),
+        zone: zone.id,
+        ...(customer && { customerId: String(customer.id) }),
+      },
       expires_at: Math.floor(Date.now() / 1000) + 60 * 60,
       custom_text: {
         submit: {

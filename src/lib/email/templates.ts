@@ -57,7 +57,7 @@ const itemLabel = (i: EmailOrder["items"][number]) => `${i.productName}${i.varia
 
 /* ——— Mise en page commune ——— */
 
-function layout(opts: { preheader: string; title: string; body: string; footerNote?: string }) {
+export function layout(opts: { preheader: string; title: string; body: string; footerNote?: string }) {
   return `<!doctype html>
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(opts.title)}</title></head>
 <body style="margin:0;padding:0;background:${C.creme};color:${C.brun};font-family:${FONT};">
@@ -84,7 +84,7 @@ function layout(opts: { preheader: string; title: string; body: string; footerNo
 </body></html>`;
 }
 
-const p = (html: string) => `<p style="margin:0 0 14px;font-size:15px;line-height:1.55;">${html}</p>`;
+export const p = (html: string) => `<p style="margin:0 0 14px;font-size:15px;line-height:1.55;">${html}</p>`;
 const label = (t: string) =>
   `<div style="margin:22px 0 8px;font-size:11px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:${C.soft};border-bottom:2px solid ${C.brun};padding-bottom:6px;">${esc(t)}</div>`;
 
@@ -254,4 +254,44 @@ export function shippedEmail(o: EmailOrder): RenderedEmail {
     ...addressLines(o),
   ].join("\n");
   return { subject, html, text: text + textFooter() };
+}
+
+/* ——— Compte client ——— */
+
+export const button = (href: string, labelText: string) =>
+  `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 18px;"><tr><td style="background:${C.brun};">
+  <a href="${esc(href)}" style="display:inline-block;padding:12px 20px;font-size:13px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;color:${C.creme};text-decoration:none;">${esc(labelText)}</a>
+</td></tr></table>`;
+
+export function verificationEmail(name: string, url: string): RenderedEmail {
+  const first = name.trim().split(/\s+/)[0] || "";
+  return {
+    subject: `Confirmez votre adresse e-mail — ${site.name}`,
+    html: layout({
+      preheader: "Confirmez votre adresse pour activer votre compte Maison Kayes.",
+      title: `Bienvenue${first ? ` ${first}` : ""} !`,
+      body: [
+        p("Votre compte Maison Kayes est créé. Confirmez votre adresse e-mail pour retrouver toutes vos commandes dans votre espace client."),
+        button(url, "Confirmer mon adresse"),
+        p(`<span style="font-size:13px;color:${C.soft};">Ce lien est valable 48 heures. Si vous n’avez pas créé de compte, ignorez simplement cet e-mail.</span>`),
+      ].join(""),
+    }),
+    text: `Bienvenue${first ? ` ${first}` : ""} !\n\nVotre compte Maison Kayes est créé. Confirmez votre adresse e-mail pour retrouver toutes vos commandes :\n${url}\n\nCe lien est valable 48 heures. Si vous n’avez pas créé de compte, ignorez cet e-mail.${textFooter()}`,
+  };
+}
+
+export function passwordResetEmail(url: string): RenderedEmail {
+  return {
+    subject: `Réinitialisation de votre mot de passe — ${site.name}`,
+    html: layout({
+      preheader: "Choisissez un nouveau mot de passe pour votre compte Maison Kayes.",
+      title: "Nouveau mot de passe",
+      body: [
+        p("Vous avez demandé à réinitialiser le mot de passe de votre compte Maison Kayes."),
+        button(url, "Choisir un nouveau mot de passe"),
+        p(`<span style="font-size:13px;color:${C.soft};">Ce lien est valable 1 heure et ne fonctionne qu’une fois. Si vous n’êtes pas à l’origine de cette demande, ignorez cet e-mail : votre mot de passe reste inchangé.</span>`),
+      ].join(""),
+    }),
+    text: `Vous avez demandé à réinitialiser le mot de passe de votre compte Maison Kayes.\n\nChoisir un nouveau mot de passe :\n${url}\n\nCe lien est valable 1 heure. Si vous n’êtes pas à l’origine de cette demande, ignorez cet e-mail.${textFooter()}`,
+  };
 }

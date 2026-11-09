@@ -128,6 +128,17 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <Link
+            href="/compte"
+            aria-current={pathname.startsWith("/compte") ? "page" : undefined}
+            className="btn btn-ghost hidden min-h-11 min-w-11 gap-2 px-3 py-2 text-[0.85rem] sm:inline-flex"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" />
+            </svg>
+            <span className="sr-only xl:not-sr-only">Mon compte</span>
+          </Link>
           <ShopButton className="btn btn-orange hidden min-h-11 px-4 py-2 text-[0.85rem] sm:inline-flex" />
           <button
             ref={toggleRef}
@@ -177,6 +188,9 @@ export function Header() {
           </ul>
           <div className="mt-8">
             <ShopButton className="btn btn-orange w-full text-base" onClick={() => setOpen(false)} />
+            <Link href="/compte" onClick={() => setOpen(false)} className="btn btn-ghost mt-3 w-full text-base">
+              Mon compte
+            </Link>
           </div>
         </nav>
       </div>
