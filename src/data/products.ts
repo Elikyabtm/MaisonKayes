@@ -151,6 +151,71 @@ export const products: Product[] = [
     stripeProductId: null,
     upcycled: false,
   },
+  {
+    id: "mk-006",
+    slug: "chouchous-imprimes",
+    name: "Chouchous imprimés",
+    category: "accessoires",
+    description:
+      "Des chouchous en tissu froncé, présentés dans deux imprimés : un motif marbré bleu, brique, noir et blanc, et un bleu roi à motifs dorés. Une petite patte crème est cousue sur chacun.",
+    images: [
+      { src: "/images/chouchous-imprimes-produit.webp", width: 1122, height: 1402, kind: "produit", alt: "Chouchous en tissu posés à plat sur une pierre : deux à l’imprimé marbré bleu, brique, noir et blanc, un bleu roi à motifs dorés" },
+      { src: "/images/chouchous-imprimes-porte.webp", width: 1122, height: 1402, kind: "portee", position: "50% 25%", alt: "Mannequin portant le chouchou bleu roi à motifs dorés sur une queue de cheval haute tressée" },
+      { src: "/images/chouchous-imprimes-detail-imprimes.webp", width: 1122, height: 1402, kind: "detail", alt: "Gros plan sur les deux imprimés : bleu roi à motifs dorés et marbré bleu, brique, noir et blanc, avec la patte crème cousue" },
+    ],
+    features: [
+      "Tissu froncé",
+      "Imprimé marbré bleu, brique, noir et blanc",
+      "Imprimé bleu roi à motifs dorés",
+      "Petite patte crème cousue",
+    ],
+    stripeProductId: null,
+    upcycled: false,
+  },
+  {
+    id: "mk-007",
+    slug: "boucles-oreilles-textiles",
+    name: "Boucles d’oreilles textiles",
+    category: "accessoires",
+    description:
+      "Des boucles d’oreilles pendantes en tissu imprimé plié en forme de feuille, aux tons noir, brique, blanc et bleu. Chacune est montée sur un crochet doré, sous une perle facettée orangée et deux perles translucides.",
+    images: [
+      { src: "/images/boucles-oreilles-textiles-produit.webp", width: 1122, height: 1402, kind: "produit", alt: "Paire de boucles d’oreilles posée à plat : feuilles en tissu imprimé noir, brique, blanc et bleu, perles et crochets dorés" },
+      { src: "/images/boucles-oreilles-textiles-portee.webp", width: 1122, height: 1402, kind: "portee", position: "50% 30%", alt: "Mannequin aux longues tresses portant une boucle d’oreille en tissu imprimé en forme de feuille" },
+      { src: "/images/boucles-oreilles-textiles-presentoir.webp", width: 1122, height: 1402, kind: "scene", alt: "Paire de boucles d’oreilles textiles suspendue à un présentoir en bois clair" },
+      { src: "/images/boucles-oreilles-textiles-detail-crochet.webp", width: 1122, height: 1402, kind: "detail", position: "50% 40%", alt: "Gros plan sur le crochet doré, la perle facettée orangée, les deux perles translucides et le tissu imprimé" },
+    ],
+    features: [
+      "Forme de feuille en tissu plié",
+      "Imprimé noir, brique, blanc et bleu",
+      "Crochet doré",
+      "Perle facettée orangée et deux perles translucides",
+    ],
+    stripeProductId: null,
+    upcycled: false,
+  },
+  {
+    id: "mk-008",
+    slug: "echarpe-cagoule-bleu-roi-dore",
+    name: "Écharpe cagoule bleu roi et doré",
+    category: "accessoires",
+    description:
+      "Une écharpe à capuche bleu roi, parcourue de bandes et de médaillons imprimés jaune doré. La capuche se prolonge en deux pans terminés en pointe, et l’intérieur est doublé d’un tissu bleu uni.",
+    images: [
+      { src: "/images/echarpe-cagoule-bleu-roi-produit.webp", width: 1122, height: 1402, kind: "produit", alt: "Écharpe cagoule bleu roi et doré posée à plat : capuche doublée de bleu uni et deux pans imprimés de médaillons dorés" },
+      { src: "/images/echarpe-cagoule-bleu-roi-portee-face.webp", width: 1122, height: 1402, kind: "portee", position: "50% 25%", alt: "Mannequin portant l’écharpe cagoule bleu roi et doré, capuche relevée, vue de face" },
+      { src: "/images/echarpe-cagoule-bleu-roi-portee-trois-quarts.webp", width: 1122, height: 1402, kind: "portee", position: "50% 25%", alt: "Mannequin portant l’écharpe cagoule bleu roi et doré, capuche relevée, vue de trois quarts" },
+      { src: "/images/echarpe-cagoule-bleu-roi-detail-imprime.webp", width: 1122, height: 1402, kind: "detail", position: "50% 45%", alt: "Gros plan sur l’imprimé bleu roi à bandes et médaillons jaune doré, le tissu et les coutures" },
+    ],
+    features: [
+      "Capuche prolongée de deux pans",
+      "Imprimé bleu roi à bandes et médaillons jaune doré",
+      "Doublure bleue unie",
+      "Pans terminés en pointe",
+    ],
+    stripeProductId: null,
+    upcycled: false,
+  },
 ];
 
 export const getProduct = (slug: string) => products.find((p) => p.slug === slug);
