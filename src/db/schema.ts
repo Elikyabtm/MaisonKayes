@@ -3,6 +3,7 @@ import {
   customType,
   index,
   integer,
+  unique,
   jsonb,
   pgTable,
   serial,
@@ -168,6 +169,8 @@ export const orders = pgTable(
     fulfillmentStatus: text().$type<FulfillmentStatus>().notNull().default("a_preparer"),
     carrier: text(),
     trackingNumber: text(),
+    /** Lien de suivi du transporteur (facultatif). */
+    trackingUrl: text(),
     note: text(),
     /** Stock déjà retiré pour cette commande (évite un double décrément). */
     stockApplied: boolean().notNull().default(false),
@@ -237,3 +240,34 @@ export const stockMovements = pgTable(
   (t) => [index("stock_movements_variant_idx").on(t.variantId, t.createdAt)],
 );
 
+
+/* ——— E-mails de commande ——— */
+
+export const orderEmailKinds = ["confirmation", "notification_interne", "expedition"] as const;
+export type OrderEmailKind = (typeof orderEmailKinds)[number];
+export const orderEmailStatuses = ["en_cours", "envoye", "echec"] as const;
+export type OrderEmailStatus = (typeof orderEmailStatuses)[number];
+
+/**
+ * Une ligne au plus par commande et par type d’e-mail : c’est ce verrou qui empêche les doublons
+ * (notification Stripe rejouée, statut « Expédiée » enregistré deux fois).
+ */
+export const orderEmails = pgTable(
+  "order_emails",
+  {
+    id: serial().primaryKey(),
+    orderId: integer()
+      .notNull()
+      .references(() => orders.id, { onDelete: "cascade" }),
+    kind: text().$type<OrderEmailKind>().notNull(),
+    status: text().$type<OrderEmailStatus>().notNull().default("en_cours"),
+    recipient: text().notNull(),
+    attempts: integer().notNull().default(0),
+    lastError: text(),
+    providerId: text(),
+    sentAt: timestamp({ withTimezone: true }),
+    createdAt: now(),
+    updatedAt: now(),
+  },
+  (t) => [unique("order_emails_order_kind_unique").on(t.orderId, t.kind), index("order_emails_status_idx").on(t.status)],
+);

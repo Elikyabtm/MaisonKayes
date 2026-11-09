@@ -4,6 +4,7 @@ import type Stripe from "stripe";
 import { getZone } from "@/data/shipping";
 import { getDb, schema } from "@/db";
 import type { PaymentStatus } from "@/db/schema";
+import { sendPaidOrderEmails } from "./email/order-emails";
 import { moveStock, StockError } from "./inventory";
 import { revalidateProducts } from "./revalidate";
 
@@ -119,6 +120,10 @@ export async function recordCheckout(stripe: Stripe, sessionId: string) {
     await refundOrder(stripe, result.orderId, session.payment_intent, "stock_epuise");
   }
   if (result.created) await revalidateProducts([result.productId]);
+  // Commande enregistrée et payée : confirmation au client et notification interne (une seule fois chacune).
+  if (result.created && !result.oversold && paymentStatusOf(session) === "paye") {
+    await sendPaidOrderEmails(result.orderId);
+  }
   return result;
 }
 
@@ -144,7 +149,10 @@ export async function markAsyncPaid(stripe: Stripe, sessionId: string) {
   // Commande annulée faute de stock pendant que le paiement était en attente : on rembourse.
   if (order.fulfillmentStatus === "annulee" && !order.stockApplied) {
     await refundOrder(stripe, order.id, order.stripePaymentIntentId, "stock_epuise");
+    return;
   }
+  // Paiement différé confirmé : e-mails de commande (déjà envoyés si la commande était payée dès le départ).
+  if (order.fulfillmentStatus !== "annulee") await sendPaidOrderEmails(order.id);
 }
 
 /** Paiement différé refusé : commande annulée et stock remis en vente. */

@@ -65,6 +65,25 @@ et 20 par adresse IP sur 15 minutes.
   fiches visibles forment la sélection de l’accueil), variantes, photos (import, texte alternatif, ordre, suppression).
   L’adresse d’une fiche (`/creations/<slug>`) ne change jamais.
 
+## E-mails de commande (Resend)
+
+Le site envoie ses propres e-mails ; **Stripe envoie les reçus de paiement et de remboursement**
+(Stripe → Paramètres → E-mails clients : activer « Paiements réussis » et « Remboursements »).
+
+| E-mail | Déclencheur | Destinataire |
+| --- | --- | --- |
+| Confirmation de commande (référence, articles, variantes, quantités, total payé, livraison) | Paiement confirmé par Stripe et commande enregistrée (webhook) | Client |
+| « Nouvelle commande à préparer » | Même moment | `ORDER_NOTIFICATION_EMAIL` |
+| Avis d’expédition (référence, transporteur, numéro et lien de suivi) | Premier passage au statut « Expédiée » dans le dashboard | Client |
+
+- **Pas de doublon** : chaque e-mail est réservé en base (une ligne par commande et par type) avant l’envoi.
+  Une notification Stripe rejouée ou un statut « Expédiée » enregistré plusieurs fois n’envoie rien de plus.
+  Resend reçoit en plus une clé d’idempotence.
+- **Échec d’envoi** : la commande reste payée et à préparer. L’erreur s’affiche dans la commande (rubrique « E-mails »),
+  dans la vue d’ensemble et via le filtre « E-mail en échec » ; le bouton « Relancer cet e-mail » ne renvoie que celui-là.
+- **Réglages** : `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_REPLY_TO`, `ORDER_NOTIFICATION_EMAIL` (voir `.env.example`).
+  Tant qu’ils manquent, les envois sont marqués en échec avec le motif « non configuré ».
+
 ## Catégories
 
 Vêtements · Couvre-chefs · Accessoires (`src/data/categories.ts`). L’ancien lien `/creations?categorie=lingettes`
@@ -79,7 +98,7 @@ Aucun produit n’est à créer dans Stripe : le prix est transmis à chaque com
 1. Créer le compte Stripe et activer les moyens de paiement (cartes, Bancontact, Apple Pay, Google Pay…).
 2. Créer les **tarifs de livraison** (Produits → Tarifs de livraison) et renseigner leurs `shr_…` (voir `.env.example`).
 3. Créer le **webhook** vers `https://<domaine>/api/stripe/webhook` avec les quatre événements listés dans `.env.example`.
-4. Activer les reçus par e-mail (Paramètres → E-mails clients → Paiements réussis).
+4. Activer les reçus Stripe (Paramètres → E-mails clients → Paiements réussis et Remboursements).
 5. Dans le dashboard : renseigner le prix et le stock de chaque pièce.
 6. Tester en mode test (`sk_test_…`, carte `4242 4242 4242 4242`), puis passer aux clés `sk_live_…`.
 

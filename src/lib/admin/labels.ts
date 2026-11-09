@@ -36,6 +36,9 @@ export const stockLevelLabels: Record<StockLevel, string> = {
 /** Messages de retour après une action (codes passés dans l’URL : ?ok=… / ?erreur=…). */
 export const flashMessages: Record<string, string> = {
   statut: "Statut de la commande mis à jour.",
+  statut_email: "Statut « Expédiée » enregistré, avis d’expédition envoyé au client.",
+  email_envoye: "E-mail envoyé.",
+  email_deja: "Cet e-mail est déjà parti : rien n’a été renvoyé.",
   suivi: "Informations d’expédition enregistrées.",
   annulee: "Commande annulée.",
   annulee_stock: "Commande annulée, articles remis en stock.",
@@ -64,4 +67,9 @@ export const flashMessages: Record<string, string> = {
   variante_derniere: "Une fiche doit garder au moins une variante.",
   annulee_deja: "Cette commande est annulée : son statut ne peut plus changer.",
   motif: "Choisissez un motif.",
+  lien_suivi: "Lien de suivi invalide : il doit commencer par https://.",
+  email_expedition_echec:
+    "Statut « Expédiée » enregistré, mais l’avis d’expédition n’a pas pu partir. Relancez-le depuis la rubrique « E-mails ».",
+  email_echec: "L’e-mail n’a pas pu partir : voir le détail dans la rubrique « E-mails ».",
+  email_non_applicable: "Cet e-mail ne peut pas être envoyé pour cette commande.",
 };

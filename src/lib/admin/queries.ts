@@ -4,7 +4,7 @@ import { getDb, schema } from "@/db";
 import { fulfillmentStatuses, paymentStatuses, type FulfillmentStatus, type PaymentStatus } from "@/db/schema";
 import { stockLevel, type StockLevel } from "./labels";
 
-const { orders, orderItems, products, variants, productImages, stockMovements, adminUsers } = schema;
+const { orders, orderItems, orderEmails, products, variants, productImages, stockMovements, adminUsers } = schema;
 
 export const PAGE_SIZE = 30;
 
@@ -25,6 +25,7 @@ export async function getOverview() {
     .orderBy(asc(orders.createdAt))
     .limit(8);
 
+  const [{ n: failedEmails }] = await db.select({ n: count() }).from(orderEmails).where(eq(orderEmails.status, "echec"));
   const stock = await listStock();
   const flat = stock.flatMap((p) => p.variants.map((v) => ({ ...v, product: p })));
 
@@ -35,6 +36,7 @@ export async function getOverview() {
       shipped: sum((r) => r.status === "expediee"),
       delivered: sum((r) => r.status === "remise"),
     },
+    failedEmails,
     toPrepare: await withItems(toPrepare),
     lowStock: flat.filter((v) => v.level === "bas"),
     outOfStock: flat.filter((v) => v.level === "rupture"),
@@ -48,7 +50,7 @@ export type OrderRow = typeof orders.$inferSelect;
 export type OrderItemRow = typeof orderItems.$inferSelect;
 
 async function withItems<T extends OrderRow>(rows: T[]) {
-  if (!rows.length) return [] as (T & { items: OrderItemRow[] })[];
+  if (!rows.length) return [] as (T & { items: OrderItemRow[]; emailFailures: number })[];
   const db = await getDb();
   const items = await db
     .select()
@@ -60,10 +62,26 @@ async function withItems<T extends OrderRow>(rows: T[]) {
       ),
     )
     .orderBy(asc(orderItems.id));
-  return rows.map((r) => ({ ...r, items: items.filter((i) => i.orderId === r.id) }));
+  const failed = await db
+    .select({ orderId: orderEmails.orderId })
+    .from(orderEmails)
+    .where(
+      and(
+        eq(orderEmails.status, "echec"),
+        inArray(
+          orderEmails.orderId,
+          rows.map((r) => r.id),
+        ),
+      ),
+    );
+  return rows.map((r) => ({
+    ...r,
+    items: items.filter((i) => i.orderId === r.id),
+    emailFailures: failed.filter((f) => f.orderId === r.id).length,
+  }));
 }
 
-export type OrderFilters = { q?: string; statut?: string; paiement?: string; page?: number };
+export type OrderFilters = { q?: string; statut?: string; paiement?: string; email?: string; page?: number };
 
 export async function listOrders(filters: OrderFilters) {
   const db = await getDb();
@@ -89,6 +107,9 @@ export async function listOrders(filters: OrderFilters) {
   }
   if (filters.paiement && (paymentStatuses as readonly string[]).includes(filters.paiement)) {
     where.push(eq(orders.paymentStatus, filters.paiement as PaymentStatus));
+  }
+  if (filters.email === "echec") {
+    where.push(inArray(orders.id, db.select({ id: orderEmails.orderId }).from(orderEmails).where(eq(orderEmails.status, "echec"))));
   }
   const page = Math.max(1, filters.page ?? 1);
   const cond = where.length ? and(...where) : undefined;
@@ -117,7 +138,13 @@ export async function getOrder(id: number) {
     .innerJoin(products, eq(products.id, variants.productId))
     .where(eq(stockMovements.orderId, id))
     .orderBy(asc(stockMovements.createdAt));
-  return { ...withLines, movements };
+  const checkedAt = Date.now();
+  const emails = (await db.select().from(orderEmails).where(eq(orderEmails.orderId, id)).orderBy(asc(orderEmails.id))).map((e) => ({
+    ...e,
+    // Envoi resté « en cours » plus de 10 minutes (processus interrompu) : relance possible.
+    stale: e.status === "en_cours" && checkedAt - e.updatedAt.getTime() > 10 * 60 * 1000,
+  }));
+  return { ...withLines, movements, emails };
 }
 
 /* ——— Stocks ——— */

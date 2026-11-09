@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { itemsSummary } from "@/components/admin/OrderSummary";
-import { dateTime, Flash, FulfillmentBadge, inputClass, labelClass, PageTitle, PaymentBadge } from "@/components/admin/ui";
+import { Badge, dateTime, Flash, FulfillmentBadge, inputClass, labelClass, PageTitle, PaymentBadge } from "@/components/admin/ui";
 import { fulfillmentStatuses, paymentStatuses } from "@/db/schema";
 import { fulfillmentLabels, paymentLabels } from "@/lib/admin/labels";
 import { listOrders } from "@/lib/admin/queries";
@@ -14,10 +14,10 @@ export default async function OrdersPage({ searchParams }: PageProps<"/admin/com
   await requireAdmin();
   const sp = await searchParams;
   const str = (k: string) => (typeof sp[k] === "string" ? (sp[k] as string) : "");
-  const filters = { q: str("q"), statut: str("statut"), paiement: str("paiement"), page: Number(str("page")) || 1 };
+  const filters = { q: str("q"), statut: str("statut"), paiement: str("paiement"), email: str("email"), page: Number(str("page")) || 1 };
   const { orders, total, page, pages } = await listOrders(filters);
   const pageHref = (n: number) => {
-    const u = new URLSearchParams({ ...(filters.q && { q: filters.q }), ...(filters.statut && { statut: filters.statut }), ...(filters.paiement && { paiement: filters.paiement }), page: String(n) });
+    const u = new URLSearchParams({ ...(filters.q && { q: filters.q }), ...(filters.statut && { statut: filters.statut }), ...(filters.paiement && { paiement: filters.paiement }), ...(filters.email && { email: filters.email }), page: String(n) });
     return `/admin/commandes?${u}`;
   };
 
@@ -62,7 +62,7 @@ export default async function OrdersPage({ searchParams }: PageProps<"/admin/com
           <button type="submit" className="btn btn-primary min-h-11 flex-1">
             Filtrer
           </button>
-          {(filters.q || filters.statut || filters.paiement) && (
+          {(filters.q || filters.statut || filters.paiement || filters.email) && (
             <Link href="/admin/commandes" className="btn btn-ghost min-h-11">
               Effacer
             </Link>
@@ -70,6 +70,14 @@ export default async function OrdersPage({ searchParams }: PageProps<"/admin/com
         </div>
       </form>
 
+      {filters.email === "echec" && (
+        <p className="mt-4 text-sm">
+          Commandes dont au moins un e-mail a échoué.{" "}
+          <Link href="/admin/commandes" className="underline">
+            Voir toutes les commandes
+          </Link>
+        </p>
+      )}
       <p className="eyebrow mt-6 text-brun-soft" aria-live="polite">
         {total} commande{total > 1 ? "s" : ""}
       </p>
@@ -105,8 +113,9 @@ export default async function OrdersPage({ searchParams }: PageProps<"/admin/com
                     <span className="lg:block">
                       <PaymentBadge status={o.paymentStatus} />
                     </span>
-                    <span className="lg:block">
+                    <span className="flex flex-wrap gap-1 lg:block">
                       <FulfillmentBadge status={o.fulfillmentStatus} />
+                      {o.emailFailures > 0 && <Badge kind="alert">E-mail en échec</Badge>}
                     </span>
                   </span>
                 </Link>
@@ -137,7 +146,7 @@ export default async function OrdersPage({ searchParams }: PageProps<"/admin/com
         </div>
       ) : (
         <p className="mt-6 border-2 border-dashed border-brun/40 p-6 text-center text-brun-soft">
-          {filters.q || filters.statut || filters.paiement
+          {filters.q || filters.statut || filters.paiement || filters.email
             ? "Aucune commande ne correspond à ces critères."
             : "Aucune commande pour le moment. Elles apparaîtront ici dès le premier paiement validé par Stripe."}
         </p>

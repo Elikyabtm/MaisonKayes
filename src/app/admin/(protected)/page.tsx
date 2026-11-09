@@ -34,6 +34,18 @@ export default async function AdminHome() {
         ))}
       </ul>
 
+      {o.failedEmails > 0 && (
+        <p role="alert" className="mt-6 border-2 border-brun bg-orange/25 px-4 py-3">
+          <strong>
+            {o.failedEmails} e-mail{o.failedEmails > 1 ? "s" : ""} de commande en échec.
+          </strong>{" "}
+          Les commandes restent valides ; relancez l’envoi depuis chaque commande.{" "}
+          <Link href="/admin/commandes?email=echec" className="font-semibold underline">
+            Voir les commandes concernées
+          </Link>
+        </p>
+      )}
+
       {o.unknownStock.length > 0 && (
         <p className="mt-6 border-2 border-brun bg-creme-deep px-4 py-3">
           <strong>{o.unknownStock.length} variante{o.unknownStock.length > 1 ? "s" : ""}</strong> sans stock renseigné : ces

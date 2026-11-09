@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { dateTime, Flash, FulfillmentBadge, inputClass, labelClass, PageTitle, PaymentBadge } from "@/components/admin/ui";
-import { stockReasons } from "@/db/schema";
-import { cancelOrderAction, updateOrder } from "@/lib/admin/actions/orders";
+import { Badge, dateTime, Flash, FulfillmentBadge, inputClass, labelClass, PageTitle, PaymentBadge } from "@/components/admin/ui";
+import { orderEmailKinds, stockReasons, type OrderEmailKind } from "@/db/schema";
+import { cancelOrderAction, retryOrderEmail, updateOrder } from "@/lib/admin/actions/orders";
+import { managementEmail, orderEmailLabels } from "@/lib/email/order-emails";
+import { emailConfigured } from "@/lib/email/resend";
 import { fulfillmentLabels } from "@/lib/admin/labels";
 import { getOrder } from "@/lib/admin/queries";
 import { requireAdmin } from "@/lib/auth/session";
@@ -161,6 +163,62 @@ export default async function OrderPage({ params, searchParams }: PageProps<"/ad
             <p className="mt-2 text-sm text-brun-soft">Session Stripe : {order.stripeSessionId}</p>
           </section>
 
+          <section aria-labelledby="emails">
+            <h2 id="emails" className="eyebrow border-b-2 border-brun pb-2">
+              E-mails
+            </h2>
+            {!emailConfigured() && (
+              <p className="mt-3 border-2 border-brun bg-orange/20 px-3 py-2 text-sm font-semibold">
+                Envoi d’e-mails non configuré (RESEND_API_KEY et EMAIL_FROM) : les envois échoueront jusqu’à sa mise en place.
+              </p>
+            )}
+            <ul>
+              {orderEmailKinds.map((kind) => {
+                const e = order.emails.find((x) => x.kind === kind);
+                const applicable = kind === "expedition" ? Boolean(order.shippedAt) && !cancelled : order.paymentStatus === "paye" && !cancelled;
+                const stale = Boolean(e?.stale);
+                const canSend = applicable && (!e || e.status === "echec" || stale);
+                return (
+                  <li key={kind} className="border-b border-brun/20 py-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="font-semibold">{orderEmailLabels[kind]}</span>
+                      <EmailBadge status={e?.status} />
+                    </div>
+                    <p className="mt-1 text-sm text-brun-soft">
+                      {e?.status === "envoye" && e.sentAt && (
+                        <>
+                          Envoyé le {dateTime(e.sentAt)} à {e.recipient}
+                          {e.attempts > 1 && ` (après ${e.attempts} tentatives)`}.
+                        </>
+                      )}
+                      {e?.status === "en_cours" && (stale ? "Envoi interrompu." : "Envoi en cours…")}
+                      {!e && (applicable ? "Pas encore envoyé." : pendingText(kind, cancelled))}
+                    </p>
+                    {e?.status === "echec" && (
+                      <p role="alert" className="mt-2 border-l-4 border-orange bg-orange/10 px-3 py-2 text-sm">
+                        <strong>Échec{e.attempts > 1 ? ` (tentative ${e.attempts})` : ""} :</strong> {e.lastError}
+                      </p>
+                    )}
+                    {canSend && (
+                      <form action={retryOrderEmail} className="mt-2">
+                        <input type="hidden" name="id" value={order.id} />
+                        <input type="hidden" name="type" value={kind} />
+                        <input type="hidden" name="retour" value={`${self}#emails`} />
+                        <button type="submit" className="btn btn-ghost min-h-10 px-3 py-1.5 text-[0.75rem]">
+                          {e ? "Relancer cet e-mail" : "Envoyer cet e-mail"}
+                        </button>
+                      </form>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+            <p className="mt-2 text-sm text-brun-soft">
+              Notifications internes envoyées à {managementEmail() ?? "— (adresse de gestion non configurée)"}. Les reçus de paiement et de
+              remboursement sont envoyés par Stripe.
+            </p>
+          </section>
+
           {order.movements.length > 0 && (
             <section aria-labelledby="mouvements">
               <h2 id="mouvements" className="eyebrow border-b-2 border-brun pb-2">
@@ -223,6 +281,23 @@ export default async function OrderPage({ params, searchParams }: PageProps<"/ad
                     </label>
                     <input id="suivi" name="suivi" defaultValue={order.trackingNumber ?? ""} className={inputClass} />
                   </div>
+                </div>
+                <div>
+                  <label htmlFor="lien_suivi" className={labelClass}>
+                    Lien de suivi (facultatif)
+                  </label>
+                  <input
+                    id="lien_suivi"
+                    name="lien_suivi"
+                    type="url"
+                    inputMode="url"
+                    placeholder="https://…"
+                    defaultValue={order.trackingUrl ?? ""}
+                    className={inputClass}
+                  />
+                  <p className="mt-1 text-sm text-brun-soft">
+                    Au premier passage en « Expédiée », le client reçoit un e-mail avec sa référence et ces informations de suivi.
+                  </p>
                 </div>
                 <div>
                   <label htmlFor="note" className={labelClass}>
@@ -289,4 +364,16 @@ export default async function OrderPage({ params, searchParams }: PageProps<"/ad
       </div>
     </>
   );
+}
+
+function EmailBadge({ status }: { status?: string }) {
+  if (status === "envoye") return <Badge kind="ok">Envoyé</Badge>;
+  if (status === "echec") return <Badge kind="alert">Échec</Badge>;
+  if (status === "en_cours") return <Badge kind="warn">En cours</Badge>;
+  return <Badge kind="muted">Non envoyé</Badge>;
+}
+
+function pendingText(kind: OrderEmailKind, cancelled: boolean) {
+  if (cancelled) return "Commande annulée : aucun envoi.";
+  return kind === "expedition" ? "Envoyé au premier passage en « Expédiée »." : "Envoyé dès la confirmation du paiement.";
 }
