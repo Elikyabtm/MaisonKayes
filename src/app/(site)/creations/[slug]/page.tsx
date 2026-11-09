@@ -7,41 +7,41 @@ import { CheckoutNotice } from "@/components/CheckoutNotice";
 import { Frieze } from "@/components/Frieze";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductGallery } from "@/components/ProductGallery";
-import { categories, getProduct, products } from "@/data/products";
+import { categories } from "@/data/categories";
+import { getCatalog, getProductBySlug } from "@/lib/catalog";
 import { pageMetadata } from "@/lib/metadata";
-import { getOffers, getZoneRates } from "@/lib/shop";
+import { getZoneRates } from "@/lib/shop";
 
-/** Prix et stock relus dans Stripe au plus toutes les 60 s (et immédiatement après une vente). */
+/** Prix et stock relus au plus toutes les 60 s, et immédiatement après une vente ou une modification. */
 export const revalidate = 60;
 
-export function generateStaticParams() {
-  return products.map((p) => ({ slug: p.slug }));
+export async function generateStaticParams() {
+  return (await getCatalog()).map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: PageProps<"/creations/[slug]">): Promise<Metadata> {
   const { slug } = await params;
-  const product = getProduct(slug);
+  const product = await getProductBySlug(slug);
   if (!product) return {};
   const img = product.images.find((i) => i.width >= 600) ?? product.images[0];
   return pageMetadata({
     title: product.name,
     description: product.description,
     path: `/creations/${product.slug}`,
-    image: { url: img.src, width: img.width, height: img.height, alt: img.alt },
+    ...(img && { image: { url: img.src, width: img.width, height: img.height, alt: img.alt } }),
   });
 }
 
 export default async function ProductPage({ params }: PageProps<"/creations/[slug]">) {
   const { slug } = await params;
-  const product = getProduct(slug);
+  const product = await getProductBySlug(slug);
   if (!product) notFound();
 
-  const [offers, zones] = await Promise.all([getOffers(), getZoneRates()]);
-  const offer = offers[product.slug] ?? null;
+  const [catalog, zones] = await Promise.all([getCatalog(), getZoneRates()]);
   const category = categories[product.category];
   const others = [
-    ...products.filter((p) => p.slug !== product.slug && p.category === product.category),
-    ...products.filter((p) => p.slug !== product.slug && p.category !== product.category),
+    ...catalog.filter((p) => p.slug !== product.slug && p.category === product.category),
+    ...catalog.filter((p) => p.slug !== product.slug && p.category !== product.category),
   ].slice(0, 3);
 
   return (
@@ -68,14 +68,18 @@ export default async function ProductPage({ params }: PageProps<"/creations/[slu
 
       <article className="container-x grid gap-10 pb-20 pt-8 lg:grid-cols-12 lg:gap-14">
         <div className="lg:col-span-7">
-          <ProductGallery images={product.images} productName={product.name} />
+          {product.images.length > 0 ? (
+            <ProductGallery images={product.images} productName={product.name} />
+          ) : (
+            <div className="flex aspect-[4/5] items-center justify-center bg-creme-deep text-brun-soft">Photos à venir</div>
+          )}
         </div>
 
         <div className="lg:col-span-5 lg:pt-4">
           <div className="lg:sticky lg:top-28">
             <p className="eyebrow text-ocre-ink">{category.singular}</p>
             <h1 className="display mt-3 text-[clamp(2.8rem,6vw,4.75rem)]">{product.name}</h1>
-            {offer && <p className="mt-4 text-2xl font-bold">{offer.price}</p>}
+            {product.price && <p className="mt-4 text-2xl font-bold">{product.price}</p>}
             <p className="mt-6 text-lg">{product.description}</p>
 
             {product.features.length > 0 && (
@@ -98,7 +102,7 @@ export default async function ProductPage({ params }: PageProps<"/creations/[slu
               <Suspense fallback={null}>
                 <CheckoutNotice />
               </Suspense>
-              <BuyBox product={product} offer={offer} zones={zones} />
+              <BuyBox product={product} zones={zones} />
             </div>
           </div>
         </div>
@@ -118,7 +122,7 @@ export default async function ProductPage({ params }: PageProps<"/creations/[slu
         <ul className="mt-10 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
           {others.map((p) => (
             <li key={p.id}>
-              <ProductCard product={p} offer={offers[p.slug]} />
+              <ProductCard product={p} />
             </li>
           ))}
         </ul>

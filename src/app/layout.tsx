@@ -1,6 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { Footer } from "@/components/Footer";
-import { Header } from "@/components/Header";
 import { site } from "@/data/site";
 import "./globals.css";
 
@@ -21,11 +19,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="fr">
       <body className="flex min-h-dvh flex-col antialiased">
-        <Header />
-        <main id="contenu" tabIndex={-1} className="flex-1 focus:outline-none">
-          {children}
-        </main>
-        <Footer />
+        {children}
       </body>
     </html>
   );

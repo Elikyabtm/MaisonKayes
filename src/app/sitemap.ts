@@ -1,9 +1,11 @@
 import type { MetadataRoute } from "next";
-import { products } from "@/data/products";
 import { mainNav, site } from "@/data/site";
+import { getCatalog } from "@/lib/catalog";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export const revalidate = 3600;
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const pages = mainNav.map((n) => n.href);
-  const productPages = products.map((p) => `/creations/${p.slug}`);
+  const productPages = (await getCatalog()).map((p) => `/creations/${p.slug}`);
   return [...pages, ...productPages].map((path) => ({ url: new URL(path, site.url).toString() }));
 }

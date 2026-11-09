@@ -5,10 +5,10 @@ import { Marquee } from "@/components/Marquee";
 import { ProductCard } from "@/components/ProductCard";
 import { Diamond, HalfDisc, Rings, Triangle } from "@/components/Shapes";
 import { about } from "@/data/content";
-import { getProduct, homeSelection, type Product } from "@/data/products";
 import { instagram, site } from "@/data/site";
+import { getCatalog } from "@/lib/catalog";
 import { pageMetadata } from "@/lib/metadata";
-import { getOffers } from "@/lib/shop";
+import { shopIsOpen } from "@/lib/shop";
 
 export const metadata = pageMetadata({
   description:
@@ -19,8 +19,10 @@ export const metadata = pageMetadata({
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const offers = await getOffers();
-  const selection = homeSelection.map(getProduct).filter(Boolean) as Product[];
+  const catalog = await getCatalog();
+  // Sélection : les cinq premières pièces du catalogue (ordre défini dans le dashboard).
+  const selection = catalog.filter((p) => p.images.length > 0).slice(0, 5);
+  const open = (await shopIsOpen()) && catalog.some((p) => p.purchasable);
   const ig = instagram();
 
   return (
@@ -74,14 +76,14 @@ export default async function HomePage() {
             Les
             <br className="hidden md:block" /> créations
           </h2>
-          <p className="max-w-sm text-lg">Trois portes d’entrée dans l’univers Maison Kayes.</p>
+          <p className="max-w-sm text-lg">Quatre portes d’entrée dans l’univers Maison Kayes.</p>
         </div>
 
         <div className="mt-12 grid gap-5 md:grid-cols-12 md:grid-rows-[auto_auto]">
           <CollectionTile
-            href="/creations?categorie=accessoires"
-            title="Accessoires"
-            label="Chapkas & pièces à porter"
+            href="/creations?categorie=couvre-chefs"
+            title="Couvre-chefs"
+            label="Chapkas & écharpe cagoule"
             image={{
               src: "/images/chapka-marbree-portee.webp",
               alt: "Mannequin portant une chapka Maison Kayes au tissu marbré et à la doublure camouflage",
@@ -105,6 +107,19 @@ export default async function HomePage() {
             tag="bg-safran text-brun"
           />
           <CollectionTile
+            href="/creations?categorie=accessoires"
+            title="Accessoires"
+            label="Chouchous, boucles & lingettes"
+            image={{
+              src: "/images/boucles-oreilles-textiles-portee.webp",
+              alt: "Mannequin portant une boucle d’oreille Maison Kayes en tissu imprimé",
+              position: "50% 38%",
+            }}
+            className="aspect-[5/4] md:col-span-5"
+            sizes="(min-width: 48rem) 40vw, 100vw"
+            tag="bg-brun text-creme"
+          />
+          <CollectionTile
             href="/upcycling"
             title="Upcycling"
             label="La démarche"
@@ -113,8 +128,8 @@ export default async function HomePage() {
               alt: "Mains cousant une pièce de tissu imprimé sur une veste en denim",
               position: "50% 50%",
             }}
-            className="aspect-[4/3] md:col-span-5 md:aspect-auto md:min-h-[20rem]"
-            sizes="(min-width: 48rem) 40vw, 100vw"
+            className="aspect-[4/3] md:col-span-12 md:aspect-[21/8]"
+            sizes="100vw"
             tag="bg-denim text-creme"
           />
         </div>
@@ -133,7 +148,7 @@ export default async function HomePage() {
           <ul className="mt-12 grid gap-x-5 gap-y-12 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
             {selection.map((p, i) => (
               <li key={p.id} className={i % 2 === 1 ? "lg:mt-20" : ""}>
-                <ProductCard product={p} offer={offers[p.slug]} sizes="(min-width: 64rem) 20vw, (min-width: 48rem) 32vw, (min-width: 26rem) 48vw, 92vw" />
+                <ProductCard product={p} sizes="(min-width: 64rem) 20vw, (min-width: 48rem) 32vw, (min-width: 26rem) 48vw, 92vw" />
               </li>
             ))}
           </ul>
@@ -228,7 +243,7 @@ export default async function HomePage() {
               Une pièce vous a plu ?
             </h2>
             <p className="mt-4 max-w-xl text-lg">
-              {Object.keys(offers).length > 0
+              {open
                 ? "Commandez-la directement sur le site, avec paiement sécurisé et livraison en Europe. Une question ? Écrivez à Maison Kayes."
                 : "La boutique en ligne ouvre bientôt. En attendant, écrivez à Maison Kayes ou suivez la marque sur Instagram."}
             </p>

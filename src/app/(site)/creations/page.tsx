@@ -2,21 +2,22 @@ import { Suspense } from "react";
 import { CreationsGrid } from "@/components/CreationsGrid";
 import { PageIntro } from "@/components/PageIntro";
 import { ProductCard } from "@/components/ProductCard";
-import { products } from "@/data/products";
+import type { CatalogProduct } from "@/data/catalog-types";
+import { getCatalog } from "@/lib/catalog";
 import { pageMetadata } from "@/lib/metadata";
-import { getOffers, type Offer } from "@/lib/shop";
+import { shopIsOpen } from "@/lib/shop";
 
 export const metadata = pageMetadata({
   title: "Créations",
   description:
-    "Vêtements, accessoires et lingettes textiles Maison Kayes : chapkas, robe à motifs géométriques et pièces Afro Fusion de Maison Kayes.",
+    "Vêtements, couvre-chefs et accessoires Maison Kayes : chapkas, écharpe cagoule, robe à motifs géométriques, chouchous, boucles d’oreilles et lingettes textiles.",
   path: "/creations",
 });
 
 export const revalidate = 60;
 
 /** Rendu statique sans filtre (avant hydratation ou sans JavaScript). */
-function AllProducts({ offers }: { offers: Record<string, Offer> }) {
+function AllProducts({ products }: { products: CatalogProduct[] }) {
   return (
     <div>
       <div className="border-y-2 border-brun py-4">
@@ -25,7 +26,7 @@ function AllProducts({ offers }: { offers: Record<string, Offer> }) {
       <ul className="mt-10 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
         {products.map((p) => (
           <li key={p.id}>
-            <ProductCard product={p} offer={offers[p.slug]} headingLevel="h2" />
+            <ProductCard product={p} headingLevel="h2" />
           </li>
         ))}
       </ul>
@@ -34,20 +35,21 @@ function AllProducts({ offers }: { offers: Record<string, Offer> }) {
 }
 
 export default async function CreationsPage() {
-  const offers = await getOffers();
+  const products = await getCatalog();
+  const open = (await shopIsOpen()) && products.some((p) => p.purchasable);
   return (
     <>
       <PageIntro eyebrow="Le vestiaire" title="Créations">
         <p>
-          Vêtements, accessoires et lingettes textiles.{" "}
-          {Object.keys(offers).length > 0
+          Vêtements, couvre-chefs et accessoires.{" "}
+          {open
             ? "Chaque pièce se découvre ici et se commande directement sur le site, avec paiement sécurisé."
             : "La boutique en ligne ouvre bientôt : pour toute question sur une pièce, contactez la marque."}
         </p>
       </PageIntro>
       <section aria-label="Liste des créations" className="container-x pb-24">
-        <Suspense fallback={<AllProducts offers={offers} />}>
-          <CreationsGrid offers={offers} />
+        <Suspense fallback={<AllProducts products={products} />}>
+          <CreationsGrid products={products} />
         </Suspense>
       </section>
     </>

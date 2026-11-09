@@ -1,31 +1,30 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { categories, hasUpcycledProducts, products, type Category } from "@/data/products";
-import type { Offer } from "@/lib/shop";
+import type { CatalogProduct } from "@/data/catalog-types";
+import { categories, categoryIds, legacyCategories, type Category } from "@/data/categories";
 import { ProductCard } from "./ProductCard";
 
 type Filter = "tout" | Category | "upcycling";
 
-function useFilters(): { value: Filter; label: string }[] {
+export function filtersFor(products: CatalogProduct[]): { value: Filter; label: string }[] {
   const list: { value: Filter; label: string }[] = [
     { value: "tout", label: "Tout" },
-    { value: "vetements", label: categories.vetements.label },
-    { value: "accessoires", label: categories.accessoires.label },
-    { value: "lingettes", label: categories.lingettes.label },
+    ...categoryIds.map((id) => ({ value: id, label: categories[id].label })),
   ];
   // Le filtre n’apparaît que si au moins une pièce est confirmée comme upcyclée.
-  if (hasUpcycledProducts()) list.push({ value: "upcycling", label: "Upcycling" });
+  if (products.some((p) => p.upcycled)) list.push({ value: "upcycling", label: "Upcycling" });
   return list;
 }
 
-export function CreationsGrid({ offers }: { offers: Record<string, Offer> }) {
+export function CreationsGrid({ products }: { products: CatalogProduct[] }) {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
-  const filters = useFilters();
+  const filters = filtersFor(products);
 
-  const requested = params.get("categorie") as Filter | null;
+  const raw = params.get("categorie");
+  const requested = (raw && legacyCategories[raw]) ?? raw;
   const active: Filter = filters.some((f) => f.value === requested) ? (requested as Filter) : "tout";
 
   const visible = products.filter((p) => {
@@ -64,7 +63,7 @@ export function CreationsGrid({ offers }: { offers: Record<string, Offer> }) {
         <ul className="mt-10 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
           {visible.map((p) => (
             <li key={p.id}>
-              <ProductCard product={p} offer={offers[p.slug]} headingLevel="h2" />
+              <ProductCard product={p} headingLevel="h2" />
             </li>
           ))}
         </ul>

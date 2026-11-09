@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
-import { applyPaidOrder } from "@/lib/orders";
+import { markAsyncFailed, markAsyncPaid, markRefunded, recordCheckout } from "@/lib/orders";
 import { getStripe } from "@/lib/stripe";
 
-/** Webhook Stripe : met à jour le stock quand un paiement est confirmé. */
+/**
+ * Webhook Stripe. Événements à activer :
+ * checkout.session.completed, checkout.session.async_payment_succeeded,
+ * checkout.session.async_payment_failed, charge.refunded.
+ */
 export async function POST(request: Request) {
   const stripe = getStripe();
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -19,17 +23,25 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Signature invalide" }, { status: 400 });
   }
 
-  if (event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded") {
-    const session = event.data.object;
-    if (session.payment_status === "paid") {
-      try {
-        await applyPaidOrder(stripe, session.id);
-      } catch (error) {
-        console.error("[boutique] Traitement de la commande impossible", error);
-        // 500 : Stripe renverra l’événement plus tard.
-        return NextResponse.json({ error: "Traitement impossible" }, { status: 500 });
-      }
+  try {
+    switch (event.type) {
+      case "checkout.session.completed":
+        await recordCheckout(stripe, event.data.object.id);
+        break;
+      case "checkout.session.async_payment_succeeded":
+        await markAsyncPaid(stripe, event.data.object.id);
+        break;
+      case "checkout.session.async_payment_failed":
+        await markAsyncFailed(event.data.object.id);
+        break;
+      case "charge.refunded":
+        await markRefunded(event.data.object);
+        break;
     }
+  } catch (error) {
+    console.error(`[boutique] Traitement de ${event.type} impossible`, error);
+    // 500 : Stripe renverra l’événement plus tard.
+    return NextResponse.json({ error: "Traitement impossible" }, { status: 500 });
   }
   return NextResponse.json({ received: true });
 }

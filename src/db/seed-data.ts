@@ -1,56 +1,37 @@
 /**
- * Catalogue Maison Kayes — source unique des fiches produit.
- *
- * Règles :
- * - Les noms sont provisoires et descriptifs : les modifier ici suffit.
- * - Le prix et le stock se gèrent dans Stripe (prix par défaut du produit et métadonnée `stock`).
- *   Ici, il suffit de renseigner `stripeProductId` (identifiant `prod_…`).
- * - Ne renseigner `features` qu’avec des informations confirmées.
- * - `upcycled: true` uniquement si la pièce est confirmée comme upcyclée
- *   (le filtre « Upcycling » apparaît automatiquement dès qu’une pièce l’est).
+ * Catalogue de départ, importé une seule fois dans la base de données quand elle est vide.
+ * Ensuite, les fiches se gèrent depuis le dashboard /admin : modifier ce fichier n’a plus d’effet.
  */
+import type { Category } from "@/data/categories";
 
-export type Category = "vetements" | "accessoires" | "lingettes";
-
-export const categories: Record<Category, { label: string; singular: string }> = {
-  vetements: { label: "Vêtements", singular: "Vêtement" },
-  accessoires: { label: "Accessoires", singular: "Accessoire" },
-  lingettes: { label: "Lingettes", singular: "Lingettes textiles" },
-};
-
-export type ProductImage = {
+export type SeedImage = {
   src: string;
   width: number;
   height: number;
   alt: string;
-  /** Rôle de l’image : photo produit, portée, détail ou mise en scène (image générée). */
   kind: "produit" | "portee" | "detail" | "scene";
-  /** Cadrage CSS `object-position`, réglé image par image. */
   position?: string;
 };
 
-export type Product = {
+export type SeedProduct = {
   id: string;
   slug: string;
   name: string;
   category: Category;
-  /** Description courte, fondée sur ce qui est visible sur la photo produit. */
   description: string;
-  /** Première image = photo produit ; seconde = photo portée si elle existe. */
-  images: ProductImage[];
-  /** Caractéristiques confirmées uniquement. */
+  images: SeedImage[];
   features: string[];
-  /** Produit Stripe (`prod_…`). `null` = pas encore en vente : invitation à contacter la marque. */
-  stripeProductId: string | null;
+  /** Déclinaisons ; sans cette liste, une seule variante « Unique ». */
+  variants?: string[];
   upcycled: boolean;
 };
 
-export const products: Product[] = [
+export const seedProducts: SeedProduct[] = [
   {
     id: "mk-001",
     slug: "chapka-camouflage-verte",
     name: "Chapka camouflage verte",
-    category: "accessoires",
+    category: "couvre-chefs",
     description:
       "Une chapka à imprimé camouflage vert, kaki et brun, adoucie par une doublure blanche aux poils longs. Une breloque dorée vient signer le rabat frontal.",
     images: [
@@ -66,14 +47,13 @@ export const products: Product[] = [
       "Cache-oreilles avec liens",
       "Breloque dorée sur le rabat avant",
     ],
-    stripeProductId: null,
     upcycled: false,
   },
   {
     id: "mk-002",
     slug: "chapka-bleu-roi-motifs-dores",
     name: "Chapka bleu roi à motifs dorés",
-    category: "accessoires",
+    category: "couvre-chefs",
     description:
       "Une chapka bleu roi travaillée avec un tissu imprimé de motifs géométriques dorés, associée à une doublure blanche aux poils longs et à une breloque dorée.",
     images: [
@@ -89,14 +69,13 @@ export const products: Product[] = [
       "Cache-oreilles avec liens",
       "Breloque dorée sur le rabat avant",
     ],
-    stripeProductId: null,
     upcycled: false,
   },
   {
     id: "mk-003",
     slug: "chapka-marbree-doublure-camouflage",
     name: "Chapka marbrée, doublure camouflage",
-    category: "accessoires",
+    category: "couvre-chefs",
     description:
       "Un tissu à effet marbré bleu nuit, brique et blanc rencontre une doublure bouclée à motif camouflage, visible sur le rabat et les cache-oreilles.",
     images: [
@@ -108,14 +87,13 @@ export const products: Product[] = [
       "Doublure bouclée à motif camouflage",
       "Cache-oreilles",
     ],
-    stripeProductId: null,
     upcycled: false,
   },
   {
     id: "mk-004",
     slug: "lingettes-textiles",
     name: "Lingettes textiles imprimé & éponge",
-    category: "lingettes",
+    category: "accessoires",
     description:
       "Des carrés textiles qui associent une face en tissu imprimé jaune, fuchsia et noir à une face éponge turquoise. Chaque lingette porte une petite étiquette.",
     images: [
@@ -129,7 +107,6 @@ export const products: Product[] = [
       "Une face éponge turquoise",
       "Étiquette cousue",
     ],
-    stripeProductId: null,
     upcycled: false,
   },
   {
@@ -148,7 +125,6 @@ export const products: Product[] = [
       "Fond noir, lignes jaunes et pois rouges",
       "Ourlet souligné d’une bordure rouge",
     ],
-    stripeProductId: null,
     upcycled: false,
   },
   {
@@ -169,7 +145,7 @@ export const products: Product[] = [
       "Imprimé bleu roi à motifs dorés",
       "Petite patte crème cousue",
     ],
-    stripeProductId: null,
+    variants: ["Marbré", "Bleu roi à motifs dorés"],
     upcycled: false,
   },
   {
@@ -191,14 +167,13 @@ export const products: Product[] = [
       "Crochet doré",
       "Perle facettée orangée et deux perles translucides",
     ],
-    stripeProductId: null,
     upcycled: false,
   },
   {
     id: "mk-008",
     slug: "echarpe-cagoule-bleu-roi-dore",
     name: "Écharpe cagoule bleu roi et doré",
-    category: "accessoires",
+    category: "couvre-chefs",
     description:
       "Une écharpe à capuche bleu roi, parcourue de bandes et de médaillons imprimés jaune doré. La capuche se prolonge en deux pans terminés en pointe, et l’intérieur est doublé d’un tissu bleu uni.",
     images: [
@@ -213,20 +188,6 @@ export const products: Product[] = [
       "Doublure bleue unie",
       "Pans terminés en pointe",
     ],
-    stripeProductId: null,
     upcycled: false,
   },
-];
-
-export const getProduct = (slug: string) => products.find((p) => p.slug === slug);
-
-export const hasUpcycledProducts = () => products.some((p) => p.upcycled);
-
-/** Ordre de la sélection de la page d’accueil. */
-export const homeSelection = [
-  "chapka-camouflage-verte",
-  "chapka-bleu-roi-motifs-dores",
-  "chapka-marbree-doublure-camouflage",
-  "lingettes-textiles",
-  "robe-motifs-geometriques",
 ];

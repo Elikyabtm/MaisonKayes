@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Diamond } from "@/components/Shapes";
 import { instagram, site } from "@/data/site";
-import { formatMoney } from "@/lib/shop";
+import { eq } from "drizzle-orm";
+import { getDb, schema } from "@/db";
+import { formatMoney } from "@/lib/money";
 import { getStripe } from "@/lib/stripe";
 
 export const metadata: Metadata = { title: "Merci pour votre commande", robots: { index: false } };
@@ -24,6 +26,15 @@ export default async function MerciPage({ searchParams }: PageProps<"/commande/m
   const order = await getOrder(typeof session_id === "string" ? session_id : undefined);
   const ig = instagram();
   const name = order?.customer_details?.name?.split(" ")[0];
+  const recorded = order
+    ? (
+        await (await getDb())
+          .select({ reference: schema.orders.reference })
+          .from(schema.orders)
+          .where(eq(schema.orders.stripeSessionId, order.id))
+          .limit(1)
+      )[0]
+    : undefined;
 
   return (
     <section className="container-x pb-24 pt-20 md:pt-28">
@@ -42,6 +53,11 @@ export default async function MerciPage({ searchParams }: PageProps<"/commande/m
               {order.customer_details?.email && <> Une confirmation est envoyée à {order.customer_details.email}.</>}
             </p>
             <p className="mt-4">Maison Kayes prépare maintenant votre commande.</p>
+            {recorded?.reference && (
+              <p className="mt-4">
+                Référence de commande : <strong>{recorded.reference}</strong>
+              </p>
+            )}
           </div>
           <div className="md:col-span-5 md:col-start-8">
             <h2 className="eyebrow border-b-2 border-brun pb-2">Récapitulatif</h2>

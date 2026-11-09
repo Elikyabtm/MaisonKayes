@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { ProductImage } from "@/data/products";
+import type { ProductImage } from "@/data/catalog-types";
 
 const kindLabel: Record<ProductImage["kind"], string> = {
   produit: "Photo produit",
